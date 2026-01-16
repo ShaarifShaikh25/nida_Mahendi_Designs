@@ -1,0 +1,22 @@
+# .gitignore
+# Ignore system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore temporary files
+*.tmp
+*.log
+
+# Keep images folder but ignore placeholder READMEs
+images/README.md
+images/LOGO-SETUP.md
+
+# Keep the setup guide
+!WEB3FORMS-SETUP.md
