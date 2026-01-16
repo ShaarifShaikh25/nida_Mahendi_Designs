@@ -1229,6 +1229,19 @@ button {
         border-bottom: 1px solid var(--border-color);
     }
 
+    .nav-menu .nav-link {
+        color: var(--text-dark) !important;
+    }
+
+    .nav-menu .nav-link:hover,
+    .nav-menu .nav-link.active {
+        color: var(--primary-color) !important;
+    }
+
+    .nav-menu .nav-link::after {
+        background: var(--primary-color) !important;
+    }
+
     .hero-title {
         font-size: 2.5rem;
     }
