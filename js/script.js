@@ -11,12 +11,12 @@
                 if (loader.parentNode) {
                     loader.parentNode.removeChild(loader);
                 }
-            }, 600);
+            }, 400);
         }
     }
     
     // Hide after a short delay
-    setTimeout(hideLoader, 800);
+    setTimeout(hideLoader, 400);
     
     // Also hide when page fully loads
     window.addEventListener('load', hideLoader);
