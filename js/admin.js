@@ -2,6 +2,50 @@
 
 let adminUser = null;
 
+// Upload Product Image to Supabase Storage
+async function uploadProductImage(file) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const filePath = `products/${fileName}`;
+    
+    // Upload to Supabase Storage
+    const { data, error } = await supabaseClient.storage
+        .from('product-images')
+        .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+        });
+    
+    if (error) {
+        return { error: error.message };
+    }
+    
+    // Get public URL
+    const { data: urlData } = supabaseClient.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+    
+    return { url: urlData.publicUrl };
+}
+
+// Preview image when selected
+document.getElementById('productImage')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = `
+                <div style="margin-top: 10px;">
+                    <img src="${e.target.result}" style="max-width: 200px; border-radius: 8px; box-shadow: var(--shadow-md);" alt="Preview">
+                    <p style="margin-top: 5px; color: var(--text-light); font-size: 14px;">Image ready to upload</p>
+                </div>
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
 // Check if user is admin
 async function checkAdminAuth() {
     if (!supabaseClient) {
@@ -178,6 +222,16 @@ async function editProduct(productId) {
     document.getElementById('productInStock').checked = product.in_stock;
     document.getElementById('productFeatured').checked = product.featured;
     
+    // Show current image preview
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = `
+        <div style="margin-top: 10px;">
+            <p style="color: var(--text-light); font-size: 14px; margin-bottom: 5px;">Current Image:</p>
+            <img src="${product.image_url}" style="max-width: 200px; border-radius: 8px; box-shadow: var(--shadow-md);" alt="Current">
+            <p style="margin-top: 5px; color: var(--text-light); font-size: 12px;">Upload new image to replace</p>
+        </div>
+    `;
+    
     document.getElementById('modalTitle').textContent = 'Edit Product';
     document.getElementById('productModal').style.display = 'flex';
 }
@@ -208,13 +262,32 @@ document.getElementById('productForm')?.addEventListener('submit', async (e) => 
     e.preventDefault();
     
     const productId = document.getElementById('productId').value;
+    const imageFile = document.getElementById('productImage').files[0];
+    
+    // Upload image if new file is selected
+    let imageUrl = document.getElementById('productImageUrl').value;
+    
+    if (imageFile) {
+        const uploadResult = await uploadProductImage(imageFile);
+        if (uploadResult.error) {
+            alert('Error uploading image: ' + uploadResult.error);
+            return;
+        }
+        imageUrl = uploadResult.url;
+    }
+    
+    if (!imageUrl) {
+        alert('Please upload a product image');
+        return;
+    }
+    
     const productData = {
         name: document.getElementById('productName').value,
         description: document.getElementById('productDescription').value,
         price: parseFloat(document.getElementById('productPrice').value),
         original_price: document.getElementById('productOriginalPrice').value ? parseFloat(document.getElementById('productOriginalPrice').value) : null,
         weight: document.getElementById('productWeight').value,
-        image_url: document.getElementById('productImageUrl').value,
+        image_url: imageUrl,
         category: document.getElementById('productCategory').value,
         badge: document.getElementById('productBadge').value || null,
         in_stock: document.getElementById('productInStock').checked,

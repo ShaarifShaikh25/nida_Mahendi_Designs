@@ -1,6 +1,42 @@
 # Admin Setup Guide
 
-## Step 1: Add Admin Role to Database
+## Step 1: Create Storage Bucket for Images
+
+1. Go to Supabase Dashboard → **Storage**
+2. Click **"New bucket"**
+3. Name it: `product-images`
+4. Make it **Public** (check the box)
+5. Click **Create bucket**
+
+## Step 2: Set Storage Policies
+
+Go to Storage → product-images → Policies, then add:
+
+```sql
+-- Allow public read access
+CREATE POLICY "Public Access"
+ON storage.objects FOR SELECT
+USING ( bucket_id = 'product-images' );
+
+-- Allow authenticated users to upload
+CREATE POLICY "Authenticated users can upload"
+ON storage.objects FOR INSERT
+WITH CHECK ( bucket_id = 'product-images' AND auth.role() = 'authenticated' );
+
+-- Allow admins to delete
+CREATE POLICY "Admins can delete"
+ON storage.objects FOR DELETE
+USING ( bucket_id = 'product-images' );
+```
+
+Or use the UI:
+- Click "New Policy" → "For full customization"
+- Policy name: "Public Read"
+- Allowed operation: SELECT
+- Target roles: public
+- USING expression: `bucket_id = 'product-images'`
+
+## Step 3: Add Admin Role to Database
 
 Run this SQL in Supabase SQL Editor:
 

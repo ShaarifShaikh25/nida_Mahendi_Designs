@@ -349,9 +349,11 @@
                     </div>
                     
                     <div class="form-full-width">
-                        <label for="productImageUrl">Image URL *</label>
-                        <input type="text" id="productImageUrl" placeholder="images/product.jpeg" required>
-                        <small style="color: var(--text-light);">Enter image path or URL</small>
+                        <label for="productImage">Product Image *</label>
+                        <input type="file" id="productImage" accept="image/*" style="padding: 10px; border: 2px dashed var(--border-color); border-radius: 8px;">
+                        <small style="color: var(--text-light); display: block; margin-top: 5px;">Upload product image (JPG, PNG, JPEG)</small>
+                        <input type="hidden" id="productImageUrl">
+                        <div id="imagePreview" style="margin-top: 10px;"></div>
                     </div>
                     
                     <div>
