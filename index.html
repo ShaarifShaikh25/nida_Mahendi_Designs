@@ -11,6 +11,8 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'" crossorigin="anonymous">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -42,6 +44,36 @@
                     <li><a href="#ingredients" class="nav-link">Ingredients</a></li>
                     <li><a href="#contact" class="nav-link">Contact</a></li>
                 </ul>
+                
+                <!-- E-commerce Nav Actions -->
+                <div class="nav-actions">
+                    <!-- Cart Button -->
+                    <button class="nav-action-btn cart-btn" onclick="openCartModal()" aria-label="Shopping Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">0</span>
+                    </button>
+                    
+                    <!-- Auth Buttons (shown when logged out) -->
+                    <div class="auth-buttons">
+                        <button class="btn btn-signin" onclick="openAuthModal('signin')">Sign In</button>
+                        <button class="btn btn-signup" onclick="openAuthModal('signup')">Sign Up</button>
+                    </div>
+                    
+                    <!-- User Menu (shown when logged in) -->
+                    <div class="user-menu" style="display: none;">
+                        <button class="nav-action-btn user-btn" onclick="toggleUserDropdown()">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+                        <div class="user-dropdown">
+                            <div class="user-info">
+                                <p class="user-email"></p>
+                            </div>
+                            <a href="#orders" class="dropdown-link"><i class="fas fa-box"></i> My Orders</a>
+                            <a href="#wishlist" class="dropdown-link"><i class="fas fa-heart"></i> Wishlist</a>
+                            <button onclick="signOut()" class="dropdown-link"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </nav>
     </header>
@@ -105,97 +137,164 @@
                 <h2>Our Products</h2>
                 <p>Discover our range of premium organic henna products</p>
             </div>
-            <div class="products-grid">
-                <div class="product-card">
+            <div class="products-grid" id="productsContainer">
+                <div class="product-card" data-product-id="product-1">
                     <div class="product-image">
                         <img src="images/1.jpeg" alt="Organic Henna Powder">
                         <div class="product-badge">Bestseller</div>
+                        <button class="btn-wishlist" onclick="addToWishlist('product-1')" aria-label="Add to wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
                     </div>
                     <div class="product-info">
                         <h3>Organic Henna Powder</h3>
                         <p class="product-description">100% natural henna powder for rich, long-lasting color</p>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span class="rating-count">(128)</span>
+                        </div>
                         <div class="product-meta">
                             <span class="product-price">₹299</span>
                             <span class="product-weight">100g</span>
                         </div>
-                        <button class="btn btn-product" data-product="Organic Henna Powder">Order Now</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-1')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
 
-                <div class="product-card">
+                <div class="product-card" data-product-id="product-2">
                     <div class="product-image">
                         <img src="images/2.jpeg" alt="Ready-to-Use Henna Cones">
                         <div class="product-badge">Popular</div>
+                        <button class="btn-wishlist" onclick="addToWishlist('product-2')" aria-label="Add to wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
                     </div>
                     <div class="product-info">
                         <h3>Henna Cones (Pack of 10)</h3>
                         <p class="product-description">Ready-to-use cones for instant application</p>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span class="rating-count">(95)</span>
+                        </div>
                         <div class="product-meta">
                             <span class="product-price">₹499</span>
                             <span class="product-weight">10 pieces</span>
                         </div>
-                        <button class="btn btn-product" data-product="Henna Cones Pack">Order Now</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-2')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
 
-                <div class="product-card">
+                <div class="product-card" data-product-id="product-3">
                     <div class="product-image">
                         <img src="images/3.jpeg" alt="Bridal Special Henna">
+                        <button class="btn-wishlist" onclick="addToWishlist('product-3')" aria-label="Add to wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
                     </div>
                     <div class="product-info">
                         <h3>Bridal Special Henna</h3>
                         <p class="product-description">Premium quality henna for special occasions</p>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span class="rating-count">(156)</span>
+                        </div>
                         <div class="product-meta">
                             <span class="product-price">₹799</span>
                             <span class="product-weight">250g</span>
                         </div>
-                        <button class="btn btn-product" data-product="Bridal Special Henna">Order Now</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-3')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
 
-                <div class="product-card">
+                <div class="product-card" data-product-id="product-4">
                     <div class="product-image">
                         <img src="images/4.jpeg" alt="Henna After-Care Oil">
+                        <button class="btn-wishlist" onclick="addToWishlist('product-4')" aria-label="Add to wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
                     </div>
                     <div class="product-info">
                         <h3>After-Care Oil</h3>
                         <p class="product-description">Natural oil for deeper color and longer retention</p>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <span class="rating-count">(67)</span>
+                        </div>
                         <div class="product-meta">
                             <span class="product-price">₹199</span>
                             <span class="product-weight">50ml</span>
                         </div>
-                        <button class="btn btn-product" data-product="After-Care Oil">Order Now</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-4')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
 
-                <div class="product-card">
+                <div class="product-card" data-product-id="product-5">
                     <div class="product-image">
                         <img src="images/5.jpeg" alt="Design Stencils">
+                        <button class="btn-wishlist" onclick="addToWishlist('product-5')" aria-label="Add to wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
                     </div>
                     <div class="product-info">
                         <h3>Design Stencils Set</h3>
                         <p class="product-description">Beautiful reusable stencils for perfect patterns</p>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span class="rating-count">(43)</span>
+                        </div>
                         <div class="product-meta">
                             <span class="product-price">₹349</span>
                             <span class="product-weight">20 designs</span>
                         </div>
-                        <button class="btn btn-product" data-product="Design Stencils Set">Order Now</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-5')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
 
-                <div class="product-card">
+                <div class="product-card" data-product-id="product-6">
                     <div class="product-image">
                         <img src="images/6.jpeg" alt="Starter Kit">
                         <div class="product-badge">New</div>
+                        <button class="btn-wishlist" onclick="addToWishlist('product-6')" aria-label="Add to wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
                     </div>
                     <div class="product-info">
                         <h3>Complete Starter Kit</h3>
                         <p class="product-description">Everything you need to get started</p>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span class="rating-count">(203)</span>
+                        </div>
                         <div class="product-meta">
                             <span class="product-price">₹999</span>
+                            <span class="product-original-price">₹1,299</span>
                             <span class="product-weight">Full Set</span>
                         </div>
-                        <button class="btn btn-product" data-product="Complete Starter Kit">Order Now</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-6')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
             </div>
@@ -498,6 +597,80 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
+    <!-- Authentication Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content auth-modal">
+            <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+            
+            <!-- Sign In Form -->
+            <div id="signinForm" class="auth-form">
+                <h2>Welcome Back</h2>
+                <p class="auth-subtitle">Sign in to your account</p>
+                <form>
+                    <div class="form-group">
+                        <label for="signin-email">Email</label>
+                        <input type="email" id="signin-email" name="email" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="signin-password">Password</label>
+                        <input type="password" id="signin-password" name="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+                <p class="auth-switch">Don't have an account? <a href="#" onclick="switchAuthMode('signup'); return false;">Sign Up</a></p>
+            </div>
+            
+            <!-- Sign Up Form -->
+            <div id="signupForm" class="auth-form" style="display: none;">
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Join us to start shopping</p>
+                <form>
+                    <div class="form-group">
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" name="fullname" required placeholder="Your Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" name="email" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" name="password" required placeholder="••••••••" minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                </form>
+                <p class="auth-switch">Already have an account? <a href="#" onclick="switchAuthMode('signin'); return false;">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content cart-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-shopping-cart"></i> Shopping Cart</h2>
+                <button class="modal-close" onclick="closeCartModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="cart-items">
+                    <p class="empty-cart">Your cart is empty</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span class="cart-total-amount">₹0</span>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="proceedToCheckout()">
+                    Proceed to Checkout <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="js/script.js"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 </html>
