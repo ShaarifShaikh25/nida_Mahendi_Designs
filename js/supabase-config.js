@@ -4,11 +4,27 @@
 // Replace these with your actual Supabase project credentials
 // Get these from: Supabase Dashboard → Settings → API
 
-const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';  // e.g., https://xxxxx.supabase.co
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';  // Your public anon key
+const SUPABASE_URL = 'https://uwcuinuzwgilzpypdegd.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_PcswGRRGNOgXiGTd_tKKcg_-Mi-TUcB';
 
 // Initialize Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabaseClient;
+
+// Wait for Supabase library to load
+function initSupabase() {
+    if (typeof window.supabase !== 'undefined') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        window.supabaseClient = supabaseClient;
+        return true;
+    }
+    return false;
+}
+
+// Try to initialize immediately
+if (!initSupabase()) {
+    // If not loaded, wait for window load
+    window.addEventListener('load', initSupabase);
+}
 
 // ===================================
 // Authentication State Management
@@ -17,7 +33,8 @@ let currentUser = null;
 
 // Check if user is logged in
 async function checkAuth() {
-    const { data: { session } } = await supabase.auth.getSession();
+    if (!supabaseClient) return null;
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
         currentUser = session.user;
         updateUIForLoggedInUser();
@@ -29,15 +46,17 @@ async function checkAuth() {
 }
 
 // Listen for auth state changes
-supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
-        currentUser = session.user;
-        updateUIForLoggedInUser();
-    } else {
-        currentUser = null;
-        updateUIForLoggedOutUser();
-    }
-});
+if (supabaseClient) {
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (session) {
+            currentUser = session.user;
+            updateUIForLoggedInUser();
+        } else {
+            currentUser = null;
+            updateUIForLoggedOutUser();
+        }
+    });
+}
 
 // Update UI based on auth state
 function updateUIForLoggedInUser() {

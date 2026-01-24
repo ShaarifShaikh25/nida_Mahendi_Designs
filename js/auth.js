@@ -4,7 +4,7 @@
 
 // Sign Up
 async function signUp(email, password, fullName) {
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabaseClient.auth.signUp({
         email: email,
         password: password,
         options: {
@@ -21,7 +21,7 @@ async function signUp(email, password, fullName) {
     
     // Create customer record
     if (data.user) {
-        const { error: customerError } = await supabase
+        const { error: customerError } = await supabaseClient
             .from('customers')
             .insert([
                 {
@@ -42,7 +42,7 @@ async function signUp(email, password, fullName) {
 
 // Sign In
 async function signIn(email, password) {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
     });
@@ -58,7 +58,7 @@ async function signIn(email, password) {
 
 // Sign Out
 async function signOut() {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabaseClient.auth.signOut();
     
     if (error) {
         showNotification(error.message, 'error');
@@ -137,7 +137,7 @@ async function loadCartItems() {
         
         // Get product details for each cart item
         for (const item of guestCart) {
-            const { data: product } = await supabase
+            const { data: product } = await supabaseClient
                 .from('products')
                 .select('*')
                 .eq('id', item.productId)
@@ -153,7 +153,7 @@ async function loadCartItems() {
         }
     } else {
         // Load user cart from database
-        const { data } = await supabase
+        const { data } = await supabaseClient
             .from('cart')
             .select(`
                 *,
@@ -216,7 +216,7 @@ async function updateCartQuantity(productId, newQuantity) {
         }
     } else {
         // Update database cart
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('cart')
             .update({ quantity: newQuantity })
             .eq('customer_id', currentUser.id)
@@ -241,7 +241,7 @@ async function removeFromCart(productId) {
         updateCartCount(guestCart.length);
     } else {
         // Remove from database cart
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('cart')
             .delete()
             .eq('customer_id', currentUser.id)
@@ -270,7 +270,7 @@ async function addToWishlist(productId) {
         return;
     }
     
-    const { data: existing } = await supabase
+    const { data: existing } = await supabaseClient
         .from('wishlist')
         .select('*')
         .eq('customer_id', currentUser.id)
@@ -279,7 +279,7 @@ async function addToWishlist(productId) {
     
     if (existing) {
         // Remove from wishlist
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('wishlist')
             .delete()
             .eq('id', existing.id);
@@ -293,7 +293,7 @@ async function addToWishlist(productId) {
         updateWishlistButton(productId, false);
     } else {
         // Add to wishlist
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('wishlist')
             .insert([
                 { customer_id: currentUser.id, product_id: productId }
