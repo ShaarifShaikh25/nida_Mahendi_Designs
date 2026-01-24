@@ -160,7 +160,21 @@ CREATE POLICY "Users can view own order items" ON order_items FOR SELECT
     USING (EXISTS (SELECT 1 FROM orders WHERE orders.id = order_id AND orders.customer_id = auth.uid()));
 ```
 
-## Step 5: Enable Authentication
+## Step 5: Enable Realtime for Products
+
+1. In Supabase dashboard, go to **Database** → **Replication**
+2. Find the **products** table
+3. Toggle ON the replication for real-time updates
+4. This allows customers to see product changes instantly!
+
+Or run this SQL:
+
+```sql
+-- Enable realtime for products table
+ALTER PUBLICATION supabase_realtime ADD TABLE products;
+```
+
+## Step 6: Enable Authentication
 
 1. In Supabase dashboard, go to **Authentication** → **Providers**
 2. Enable these providers:
