@@ -284,12 +284,12 @@
                     <img src="images/logo.png" alt="Nida Mahendi Designs logo">
                     <span>Nida Mahendi Designs</span>
                 </div>
-                <h1>Sign in and go straight to your dashboard</h1>
-                <p>Customers land in their personal dashboard. Admin accounts go directly to the admin panel. One login, the right destination.</p>
+                <h1>Natural Beauty, Pure Organic Henna</h1>
+                <p>Sign in to view your orders, manage your wishlist, and enjoy express pan-India delivery.</p>
                 <div class="auth-badges">
-                    <span>Secure login</span>
-                    <span>Role based redirect</span>
-                    <span>Fast checkout</span>
+                    <span>100% Organic Henna</span>
+                    <span>Safe & Secure Checkout</span>
+                    <span>Pan-India Delivery</span>
                 </div>
             </div>
         </section>
@@ -304,10 +304,7 @@
                 <div class="auth-content">
                     <div class="auth-header">
                         <h2 id="formTitle">Welcome back</h2>
-                        <p id="formSubtitle">Sign in to continue to the correct dashboard for your account.</p>
-                        <div class="auth-note">
-                            This login is powered by Supabase Auth. Admin accounts go to the admin dashboard, and customer accounts go to the user dashboard.
-                        </div>
+                        <p id="formSubtitle">Sign in to access your orders and account.</p>
                     </div>
 
                     <form id="signinFormPage" class="auth-form active">
@@ -340,13 +337,8 @@
 
                     <p class="auth-switch" id="authSwitchText">New here? <a href="#" id="switchAuthLink">Create an account</a></p>
 
-                    <div class="auth-footer">
-                        <a href="index.html">Back to Store</a>
-                        <a href="admin.html">Admin Login</a>
-                    </div>
-
-                    <div class="auth-note" id="authNote">
-                        Admin accounts will be redirected to the admin dashboard automatically.
+                    <div class="auth-footer" style="justify-content: center;">
+                        <a href="index.html"><i class="fas fa-arrow-left"></i> Back to Store</a>
                     </div>
                 </div>
             </div>
@@ -364,7 +356,6 @@
         const formSubtitle = document.getElementById('formSubtitle');
         const switchAuthLink = document.getElementById('switchAuthLink');
         const authSwitchText = document.getElementById('authSwitchText');
-        const authNote = document.getElementById('authNote');
         const queryMode = new URLSearchParams(window.location.search).get('mode');
 
         function setMode(mode) {
@@ -376,14 +367,11 @@
             signupForm.classList.toggle('active', !isSignIn);
             formTitle.textContent = isSignIn ? 'Welcome back' : 'Create your account';
             formSubtitle.textContent = isSignIn
-                ? 'Sign in to continue to the correct dashboard for your account.'
-                : 'Create your account and get your own dashboard, wishlist, and order history.';
+                ? 'Sign in to access your orders and account.'
+                : 'Create your account to track orders and save your favorites.';
             authSwitchText.innerHTML = isSignIn
                 ? 'New here? <a href="#" id="switchAuthLink">Create an account</a>'
                 : 'Already have an account? <a href="#" id="switchAuthLink">Sign in</a>';
-            authNote.textContent = isSignIn
-                ? 'Admin accounts will be redirected to the admin dashboard automatically.'
-                : 'After signup, you can sign in and be redirected to your dashboard automatically.';
 
             const refreshedSwitchLink = document.getElementById('switchAuthLink');
             refreshedSwitchLink.addEventListener('click', (event) => {
