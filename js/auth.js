@@ -662,6 +662,250 @@ function toggleUserDropdown() {
 }
 
 // ===================================
+// Customer Orders & Wishlist Modals
+// ===================================
+
+async function openCustomerOrdersModal() {
+    const modal = document.getElementById('customerOrdersModal');
+    if (!modal) return;
+
+    // Close dropdown
+    const dropdown = document.querySelector('.user-dropdown');
+    if (dropdown) {
+        dropdown.style.opacity = '0';
+        dropdown.style.visibility = 'hidden';
+    }
+
+    modal.style.display = 'flex';
+    const listEl = document.getElementById('customerOrdersList');
+    if (!listEl) return;
+
+    listEl.innerHTML = '<div class="orders-loading"><i class="fas fa-spinner fa-spin"></i> Loading your orders...</div>';
+
+    let orders = [];
+
+    // 1. Fetch from Supabase if logged in
+    if (currentUser && typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('orders')
+                .select('*, order_items(*, product:products(*))')
+                .eq('customer_id', currentUser.id)
+                .order('created_at', { ascending: false });
+
+            if (!error && Array.isArray(data)) {
+                orders = data;
+            }
+        } catch (err) {
+            console.error('Error fetching orders from Supabase:', err);
+        }
+    }
+
+    // 2. Fetch local storage orders backup and merge (avoid duplicates by order_number)
+    const localOrders = JSON.parse(localStorage.getItem('user_orders') || '[]');
+    const existingOrderNos = new Set(orders.map(o => o.order_number));
+    for (const lo of localOrders) {
+        if (!existingOrderNos.has(lo.order_number)) {
+            orders.push(lo);
+        }
+    }
+
+    if (orders.length === 0) {
+        listEl.innerHTML = `
+            <div class="orders-empty">
+                <i class="fas fa-box-open"></i>
+                <h3 style="margin-bottom: 8px; color: var(--text-dark);">No Orders Placed Yet</h3>
+                <p style="margin-bottom: 20px;">Browse our pure organic henna cones and bridal kits, and place your first order!</p>
+                <a href="#products" class="btn btn-primary btn-sm" onclick="closeCustomerOrdersModal()">
+                    <i class="fas fa-shopping-bag"></i> Browse Products
+                </a>
+            </div>
+        `;
+        return;
+    }
+
+    listEl.innerHTML = orders.map(order => {
+        const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }) : 'Recent';
+
+        const statusClass = `status-${(order.status || 'pending').toLowerCase()}`;
+        const shipping = order.shipping_address || {};
+        const dest = [shipping.city, shipping.state, shipping.pincode].filter(Boolean).join(', ') || 'Standard Pan-India Shipping';
+
+        let itemsSummary = '';
+        if (order.order_items && order.order_items.length > 0) {
+            itemsSummary = order.order_items.map(oi => {
+                const title = oi.product?.title || 'Organic Henna Item';
+                return `${title} × ${oi.quantity}`;
+            }).join(', ');
+        } else if (order.items && order.items.length > 0) {
+            itemsSummary = order.items.map(i => `${i.product?.title || 'Organic Henna Item'} × ${i.quantity}`).join(', ');
+        } else {
+            itemsSummary = 'Organic Henna Products';
+        }
+
+        const cleanPhone = '917057167751';
+        const waMsg = encodeURIComponent(`Hello Nida Mahendi Designs,\nI would like to track my order:\nOrder No: ${order.order_number}\nAmount: ₹${order.total_amount}\nStatus: ${order.status || 'Pending'}`);
+        const waLink = `https://wa.me/${cleanPhone}?text=${waMsg}`;
+
+        return `
+            <div class="customer-order-card">
+                <div class="order-card-header">
+                    <div>
+                        <div class="order-no"><i class="fas fa-receipt" style="color: var(--primary-color);"></i> ${order.order_number}</div>
+                        <div class="order-date"><i class="far fa-clock"></i> ${dateStr}</div>
+                    </div>
+                    <span class="order-status-badge ${statusClass}">
+                        <i class="fas fa-circle" style="font-size: 8px; vertical-align: middle; margin-right: 4px;"></i>${order.status || 'Pending'}
+                    </span>
+                </div>
+                <div class="order-card-details">
+                    <div>
+                        <div class="order-card-items-preview"><strong>Items:</strong> ${itemsSummary}</div>
+                        <div style="color: var(--text-light); font-size: 12.5px; margin-top: 4px;">
+                            <i class="fas fa-location-dot"></i> Delivery to: ${dest}
+                        </div>
+                    </div>
+                    <div class="order-card-total-box">
+                        <div style="font-size: 12px; color: var(--text-light);">Total (${order.payment_method || 'COD'}):</div>
+                        <div class="total-val">₹${order.total_amount}</div>
+                    </div>
+                </div>
+                <div class="order-card-actions">
+                    <a href="${waLink}" target="_blank" class="btn btn-whatsapp btn-sm" style="padding: 7px 14px; font-size: 13px;">
+                        <i class="fab fa-whatsapp"></i> Track on WhatsApp
+                    </a>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function closeCustomerOrdersModal() {
+    const modal = document.getElementById('customerOrdersModal');
+    if (modal) modal.style.display = 'none';
+}
+window.openCustomerOrdersModal = openCustomerOrdersModal;
+window.closeCustomerOrdersModal = closeCustomerOrdersModal;
+
+async function openWishlistModal() {
+    const modal = document.getElementById('wishlistModal');
+    if (!modal) return;
+
+    // Close dropdown
+    const dropdown = document.querySelector('.user-dropdown');
+    if (dropdown) {
+        dropdown.style.opacity = '0';
+        dropdown.style.visibility = 'hidden';
+    }
+
+    modal.style.display = 'flex';
+    const listEl = document.getElementById('wishlistItemsList');
+    if (!listEl) return;
+
+    listEl.innerHTML = '<div class="wishlist-loading"><i class="fas fa-spinner fa-spin"></i> Loading saved items...</div>';
+
+    let wishlist = [];
+
+    // 1. Fetch from Supabase if logged in
+    if (currentUser && typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('wishlist')
+                .select('id, product_id, product:products(*)')
+                .eq('customer_id', currentUser.id);
+
+            if (!error && Array.isArray(data)) {
+                wishlist = data.map(w => ({
+                    id: w.id,
+                    product: w.product || (typeof window.getProductById === 'function' ? window.getProductById(w.product_id) : null)
+                })).filter(w => w.product);
+            }
+        } catch (err) {
+            console.error('Error fetching wishlist:', err);
+        }
+    }
+
+    // 2. Fallback / local storage
+    if (wishlist.length === 0) {
+        const localWishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+        wishlist = localWishlist.map(productId => {
+            const prod = typeof window.getProductById === 'function' ? window.getProductById(productId) : null;
+            return prod ? { id: productId, product: prod } : null;
+        }).filter(Boolean);
+    }
+
+    if (wishlist.length === 0) {
+        listEl.innerHTML = `
+            <div class="orders-empty">
+                <i class="fas fa-heart" style="color: #cbd5e1; font-size: 3rem; margin-bottom: 12px; display: block;"></i>
+                <h3 style="margin-bottom: 8px; color: var(--text-dark);">Your Wishlist is Empty</h3>
+                <p style="margin-bottom: 20px;">Save your favorite organic cones and bridal combos by clicking the heart icon on any card!</p>
+                <a href="#products" class="btn btn-primary btn-sm" onclick="closeWishlistModal()">
+                    <i class="fas fa-shopping-bag"></i> Browse Products
+                </a>
+            </div>
+        `;
+        return;
+    }
+
+    listEl.innerHTML = `
+        <div class="wishlist-grid">
+            ${wishlist.map(item => `
+                <div class="wishlist-card">
+                    <button class="btn-remove-wishlist" onclick="removeWishlistItem('${item.id}')" title="Remove from wishlist">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <img src="${item.product.image_url || 'images/1.jpeg'}" alt="${item.product.title}">
+                    <div class="wishlist-info">
+                        <h4>${item.product.title}</h4>
+                        <div class="price">₹${item.product.price}</div>
+                        <button class="btn btn-primary btn-sm" style="margin-top: 8px; padding: 6px 12px; font-size: 12px;" onclick="addWishlistToCart('${item.product.id}')">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function closeWishlistModal() {
+    const modal = document.getElementById('wishlistModal');
+    if (modal) modal.style.display = 'none';
+}
+
+async function removeWishlistItem(itemId) {
+    if (currentUser && typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            await supabaseClient.from('wishlist').delete().eq('id', itemId);
+        } catch (e) {}
+    }
+    const local = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const updated = local.filter(id => id !== itemId);
+    localStorage.setItem('wishlist', JSON.stringify(updated));
+    showNotification('Item removed from wishlist', 'info');
+    openWishlistModal();
+}
+
+async function addWishlistToCart(productId) {
+    if (typeof addToCart === 'function') {
+        await addToCart(productId);
+    }
+    showNotification('Item added to cart!', 'success');
+}
+
+window.openWishlistModal = openWishlistModal;
+window.closeWishlistModal = closeWishlistModal;
+window.removeWishlistItem = removeWishlistItem;
+window.addWishlistToCart = addWishlistToCart;
+
+// ===================================
 // Event Listeners
 // ===================================
 
@@ -703,6 +947,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const cartModal = document.getElementById('cartModal');
         const checkoutModal = document.getElementById('checkoutModal');
         const orderSuccessModal = document.getElementById('orderSuccessModal');
+        const customerOrdersModal = document.getElementById('customerOrdersModal');
+        const wishlistModal = document.getElementById('wishlistModal');
         
         if (e.target === authModal) {
             closeAuthModal();
@@ -715,6 +961,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (e.target === orderSuccessModal) {
             closeOrderSuccessModal();
+        }
+        if (e.target === customerOrdersModal) {
+            closeCustomerOrdersModal();
+        }
+        if (e.target === wishlistModal) {
+            closeWishlistModal();
         }
     });
 

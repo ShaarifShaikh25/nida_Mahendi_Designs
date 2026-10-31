@@ -59,7 +59,7 @@ if (supabaseClient) {
 }
 
 // Update UI based on auth state
-function updateUIForLoggedInUser() {
+async function updateUIForLoggedInUser() {
     const authButtons = document.querySelector('.auth-buttons');
     const userMenu = document.querySelector('.user-menu');
     
@@ -70,6 +70,37 @@ function updateUIForLoggedInUser() {
     const userEmail = document.querySelector('.user-email');
     if (userEmail && currentUser) {
         userEmail.textContent = currentUser.email;
+    }
+
+    // Check if user is admin
+    const adminLink = document.getElementById('headerAdminLink');
+    const roleBadge = document.getElementById('userRoleBadge');
+    if (currentUser && typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            const { data: customer } = await supabaseClient
+                .from('customers')
+                .select('is_admin, full_name')
+                .eq('id', currentUser.id)
+                .single();
+
+            if (customer?.is_admin) {
+                if (adminLink) adminLink.style.display = 'flex';
+                if (roleBadge) {
+                    roleBadge.style.display = 'inline-block';
+                    roleBadge.textContent = 'Admin';
+                    roleBadge.className = 'user-role-badge badge-admin';
+                }
+            } else {
+                if (adminLink) adminLink.style.display = 'none';
+                if (roleBadge) {
+                    roleBadge.style.display = 'inline-block';
+                    roleBadge.textContent = 'Customer';
+                    roleBadge.className = 'user-role-badge badge-customer';
+                }
+            }
+        } catch (e) {
+            console.error('Error checking admin status:', e);
+        }
     }
     
     // Load cart count

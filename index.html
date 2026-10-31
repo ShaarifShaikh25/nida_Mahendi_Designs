@@ -101,10 +101,23 @@
                         <div class="user-dropdown" role="menu">
                             <div class="user-info">
                                 <p class="user-email"></p>
+                                <span class="user-role-badge badge-customer" id="userRoleBadge" style="display: none;">Customer</span>
                             </div>
-                            <a href="#orders" class="dropdown-link" role="menuitem"><i class="fas fa-box" aria-hidden="true"></i> My Orders</a>
-                            <a href="#wishlist" class="dropdown-link" role="menuitem"><i class="fas fa-heart" aria-hidden="true"></i> Wishlist</a>
-                            <button onclick="signOut()" class="dropdown-link" role="menuitem"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Sign Out</button>
+                            <a href="admin.html" class="dropdown-link admin-only-link" id="headerAdminLink" style="display: none;" role="menuitem">
+                                <i class="fas fa-shield-halved" style="color: #b78103;" aria-hidden="true"></i> Admin Portal
+                            </a>
+                            <button type="button" onclick="openCustomerOrdersModal()" class="dropdown-link" role="menuitem">
+                                <i class="fas fa-box" aria-hidden="true"></i> My Orders
+                            </button>
+                            <a href="user-dashboard.html" class="dropdown-link" role="menuitem">
+                                <i class="fas fa-gauge" aria-hidden="true"></i> My Dashboard
+                            </a>
+                            <button type="button" onclick="openWishlistModal()" class="dropdown-link" role="menuitem">
+                                <i class="fas fa-heart" aria-hidden="true"></i> Wishlist
+                            </button>
+                            <button type="button" onclick="signOut()" class="dropdown-link" role="menuitem">
+                                <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Sign Out
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -956,6 +969,44 @@
                         Continue Shopping
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Orders Modal -->
+    <div id="customerOrdersModal" class="modal" role="dialog" aria-labelledby="customerOrdersTitle" aria-modal="true" style="display: none;">
+        <div class="modal-content customer-orders-modal">
+            <div class="modal-header">
+                <h2 id="customerOrdersTitle"><i class="fas fa-box" style="color: var(--primary-color);"></i> My Orders</h2>
+                <button class="close-modal" onclick="closeCustomerOrdersModal()" aria-label="Close orders">&times;</button>
+            </div>
+            <div class="customer-orders-body" id="customerOrdersList">
+                <div class="orders-loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading your orders...
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 14px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #fafafa;">
+                <a href="user-dashboard.html" class="btn btn-secondary btn-sm"><i class="fas fa-gauge"></i> Full Account Dashboard</a>
+                <button type="button" class="btn btn-primary btn-sm" onclick="closeCustomerOrdersModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wishlist Modal -->
+    <div id="wishlistModal" class="modal" role="dialog" aria-labelledby="wishlistModalTitle" aria-modal="true" style="display: none;">
+        <div class="modal-content wishlist-modal">
+            <div class="modal-header">
+                <h2 id="wishlistModalTitle"><i class="fas fa-heart" style="color: #e53e3e;"></i> My Saved Wishlist</h2>
+                <button class="close-modal" onclick="closeWishlistModal()" aria-label="Close wishlist">&times;</button>
+            </div>
+            <div class="wishlist-body" id="wishlistItemsList">
+                <div class="wishlist-loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading saved items...
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 14px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #fafafa;">
+                <a href="#products" class="btn btn-secondary btn-sm" onclick="closeWishlistModal()"><i class="fas fa-shopping-bag"></i> Browse More Products</a>
+                <button type="button" class="btn btn-primary btn-sm" onclick="closeWishlistModal()">Close</button>
             </div>
         </div>
     </div>
