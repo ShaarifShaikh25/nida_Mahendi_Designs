@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Login or create an account for Nida Mahendi Designs.">
+    <title>Login - Nida Mahendi Designs</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(45, 122, 62, 0.16), transparent 28%),
+                radial-gradient(circle at 85% 10%, rgba(212, 175, 55, 0.16), transparent 24%),
+                linear-gradient(180deg, #fbf8f3 0%, #f5efe6 100%);
+        }
+
+        .auth-page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+        }
+
+        .auth-visual {
+            position: relative;
+            padding: 40px;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            background:
+                linear-gradient(135deg, rgba(26, 59, 34, 0.96), rgba(68, 39, 18, 0.92)),
+                radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.18), transparent 28%);
+            color: white;
+        }
+
+        .auth-visual::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(120deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 100%), linear-gradient(rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 100%);
+            background-size: 96px 96px, 96px 96px;
+            opacity: 0.34;
+            pointer-events: none;
+        }
+
+        .auth-visual-inner {
+            position: relative;
+            z-index: 1;
+            max-width: 540px;
+        }
+
+        .auth-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(12px);
+            margin-bottom: 24px;
+        }
+
+        .auth-brand img {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+        }
+
+        .auth-brand span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem;
+            letter-spacing: 0.02em;
+        }
+
+        .auth-visual h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 6vw, 5.2rem);
+            line-height: 0.95;
+            margin-bottom: 18px;
+            text-wrap: balance;
+        }
+
+        .auth-visual p {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            max-width: 34rem;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .auth-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 26px;
+        }
+
+        .auth-badges span {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .auth-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 28px;
+        }
+
+        .auth-card {
+            width: min(100%, 520px);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(45, 122, 62, 0.12);
+            border-radius: 30px;
+            box-shadow: 0 24px 70px rgba(27, 35, 20, 0.16);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+
+        .auth-tabs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            padding: 10px;
+            background: rgba(45, 122, 62, 0.06);
+        }
+
+        .auth-tab {
+            border: none;
+            border-radius: 18px;
+            padding: 14px 16px;
+            background: transparent;
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+        }
+
+        .auth-tab.active {
+            background: linear-gradient(135deg, #2d7a3e, #1f5d2d);
+            color: #fff;
+            box-shadow: 0 12px 28px rgba(45, 122, 62, 0.22);
+        }
+
+        .auth-content {
+            padding: 30px;
+        }
+
+        .auth-header {
+            margin-bottom: 24px;
+        }
+
+        .auth-header h2 {
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .auth-header p {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-form .form-group {
+            margin-bottom: 18px;
+        }
+
+        .auth-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(45, 122, 62, 0.14);
+            background: rgba(255, 255, 255, 0.96);
+            font-size: 1rem;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(45, 122, 62, 0.1);
+        }
+
+        .auth-submit {
+            width: 100%;
+            margin-top: 10px;
+            padding: 14px 18px;
+            border-radius: 999px;
+        }
+
+        .auth-switch {
+            margin-top: 18px;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .auth-switch a {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .auth-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 22px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .auth-footer a {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .auth-note {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(45, 122, 62, 0.08);
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 960px) {
+            .auth-page {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-visual {
+                min-height: 280px;
+                padding: 28px;
+            }
+
+            .auth-panel {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .auth-visual {
+                min-height: 220px;
+            }
+
+            .auth-content {
+                padding: 22px;
+            }
+
+            .auth-header h2 {
+                font-size: 1.65rem;
+            }
+
+            .auth-footer {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="auth-page">
+        <section class="auth-visual">
+            <div class="auth-visual-inner">
+                <div class="auth-brand">
+                    <img src="images/logo.png" alt="Nida Mahendi Designs logo">
+                    <span>Nida Mahendi Designs</span>
+                </div>
+                <h1>Sign in and go straight to your dashboard</h1>
+                <p>Customers land in their personal dashboard. Admin accounts go directly to the admin panel. One login, the right destination.</p>
+                <div class="auth-badges">
+                    <span>Secure login</span>
+                    <span>Role based redirect</span>
+                    <span>Fast checkout</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="auth-panel">
+            <div class="auth-card">
+                <div class="auth-tabs">
+                    <button id="signinTab" class="auth-tab active" type="button">Sign In</button>
+                    <button id="signupTab" class="auth-tab" type="button">Sign Up</button>
+                </div>
+
+                <div class="auth-content">
+                    <div class="auth-header">
+                        <h2 id="formTitle">Welcome back</h2>
+                        <p id="formSubtitle">Sign in to continue to the correct dashboard for your account.</p>
+                        <div class="auth-note">
+                            This login is powered by Supabase Auth. Admin accounts go to the admin dashboard, and customer accounts go to the user dashboard.
+                        </div>
+                    </div>
+
+                    <form id="signinFormPage" class="auth-form active">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" name="email" placeholder="you@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" name="password" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary auth-submit">Sign In</button>
+                    </form>
+
+                    <form id="signupFormPage" class="auth-form">
+                        <div class="form-group">
+                            <label for="signup-name-page">Full Name</label>
+                            <input type="text" id="signup-name-page" name="fullname" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-email-page">Email</label>
+                            <input type="email" id="signup-email-page" name="email" placeholder="you@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signup-password-page">Password</label>
+                            <input type="password" id="signup-password-page" name="password" placeholder="••••••••" minlength="6" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary auth-submit">Create Account</button>
+                    </form>
+
+                    <p class="auth-switch" id="authSwitchText">New here? <a href="#" id="switchAuthLink">Create an account</a></p>
+
+                    <div class="auth-footer">
+                        <a href="index.html">Back to Store</a>
+                        <a href="admin.html">Admin Login</a>
+                    </div>
+
+                    <div class="auth-note" id="authNote">
+                        Admin accounts will be redirected to the admin dashboard automatically.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const signinTab = document.getElementById('signinTab');
+        const signupTab = document.getElementById('signupTab');
+        const signinForm = document.getElementById('signinFormPage');
+        const signupForm = document.getElementById('signupFormPage');
+        const formTitle = document.getElementById('formTitle');
+        const formSubtitle = document.getElementById('formSubtitle');
+        const switchAuthLink = document.getElementById('switchAuthLink');
+        const authSwitchText = document.getElementById('authSwitchText');
+        const authNote = document.getElementById('authNote');
+        const queryMode = new URLSearchParams(window.location.search).get('mode');
+
+        function setMode(mode) {
+            const isSignIn = mode === 'signin';
+
+            signinTab.classList.toggle('active', isSignIn);
+            signupTab.classList.toggle('active', !isSignIn);
+            signinForm.classList.toggle('active', isSignIn);
+            signupForm.classList.toggle('active', !isSignIn);
+            formTitle.textContent = isSignIn ? 'Welcome back' : 'Create your account';
+            formSubtitle.textContent = isSignIn
+                ? 'Sign in to continue to the correct dashboard for your account.'
+                : 'Create your account and get your own dashboard, wishlist, and order history.';
+            authSwitchText.innerHTML = isSignIn
+                ? 'New here? <a href="#" id="switchAuthLink">Create an account</a>'
+                : 'Already have an account? <a href="#" id="switchAuthLink">Sign in</a>';
+            authNote.textContent = isSignIn
+                ? 'Admin accounts will be redirected to the admin dashboard automatically.'
+                : 'After signup, you can sign in and be redirected to your dashboard automatically.';
+
+            const refreshedSwitchLink = document.getElementById('switchAuthLink');
+            refreshedSwitchLink.addEventListener('click', (event) => {
+                event.preventDefault();
+                setMode(isSignIn ? 'signup' : 'signin');
+            });
+        }
+
+        async function redirectAuthenticatedUser(userId) {
+            const { data: customer } = await supabaseClient
+                .from('customers')
+                .select('is_admin')
+                .eq('id', userId)
+                .single();
+
+            window.location.href = customer?.is_admin ? 'admin.html' : 'user-dashboard.html';
+        }
+
+        async function ensureSignedInUserRedirect() {
+            if (!supabaseClient) {
+                setTimeout(ensureSignedInUserRedirect, 100);
+                return;
+            }
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                await redirectAuthenticatedUser(session.user.id);
+            }
+        }
+
+        signinTab.addEventListener('click', () => setMode('signin'));
+        signupTab.addEventListener('click', () => setMode('signup'));
+
+        signinForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const button = signinForm.querySelector('button[type="submit"]');
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Signing In...';
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            await signIn(email, password);
+
+            button.disabled = false;
+            button.textContent = originalText;
+        });
+
+        signupForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const button = signupForm.querySelector('button[type="submit"]');
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Creating Account...';
+
+            const fullName = document.getElementById('signup-name-page').value.trim();
+            const email = document.getElementById('signup-email-page').value.trim();
+            const password = document.getElementById('signup-password-page').value;
+            const result = await signUp(email, password, fullName);
+
+            if (result?.session) {
+                await redirectAuthenticatedUser(result.user.id);
+            } else {
+                setMode('signin');
+                document.getElementById('login-email').value = email;
+            }
+
+            button.disabled = false;
+            button.textContent = originalText;
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setMode(queryMode === 'signup' ? 'signup' : 'signin');
+            ensureSignedInUserRedirect();
+        });
+    </script>
+</body>
+</html>

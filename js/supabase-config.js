@@ -4,8 +4,8 @@
 // Replace these with your actual Supabase project credentials
 // Get these from: Supabase Dashboard → Settings → API
 
-const SUPABASE_URL = 'https://uwcuinuzwgilzpypdegd.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_PcswGRRGNOgXiGTd_tKKcg_-Mi-TUcB';
+const SUPABASE_URL = 'https://yogdqupxswhqikmcdlhq.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_urArMM0zp7aoOHBnKpc7fg_Mv49X8gp';
 
 // Initialize Supabase client
 let supabaseClient;
@@ -98,7 +98,7 @@ async function loadCartCount() {
         return;
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from('cart')
         .select('*')
         .eq('customer_id', currentUser.id);
@@ -139,7 +139,7 @@ async function addToCart(productId, quantity = 1) {
     }
     
     // Logged-in user cart in database
-    const { data: existingCart } = await supabase
+    const { data: existingCart } = await supabaseClient
         .from('cart')
         .select('*')
         .eq('customer_id', currentUser.id)
@@ -148,7 +148,7 @@ async function addToCart(productId, quantity = 1) {
     
     if (existingCart) {
         // Update quantity
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('cart')
             .update({ quantity: existingCart.quantity + quantity })
             .eq('id', existingCart.id);
@@ -159,7 +159,7 @@ async function addToCart(productId, quantity = 1) {
         }
     } else {
         // Insert new item
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('cart')
             .insert([
                 { customer_id: currentUser.id, product_id: productId, quantity }
@@ -179,7 +179,7 @@ async function addToCart(productId, quantity = 1) {
 // Products Management
 // ===================================
 async function loadProducts() {
-    const { data: products, error } = await supabase
+    const { data: products, error } = await supabaseClient
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });

@@ -216,47 +216,6 @@ function showMessage(message, type) {
 }
 
 // ===================================
-// Product Order Buttons
-// ===================================
-const productButtons = document.querySelectorAll('.btn-product');
-
-productButtons.forEach(button => {
-    button.addEventListener('click', function() {
-        const productName = this.getAttribute('data-product');
-        
-        // Scroll to contact form
-        const contactSection = document.getElementById('contact');
-        const headerOffset = 80;
-        const elementPosition = contactSection.offsetTop;
-        const offsetPosition = elementPosition - headerOffset;
-
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-        });
-
-        // Pre-fill the product field
-        setTimeout(() => {
-            const productSelect = document.getElementById('product');
-            if (productSelect) {
-                // Find matching option
-                for (let i = 0; i < productSelect.options.length; i++) {
-                    if (productSelect.options[i].value === productName) {
-                        productSelect.selectedIndex = i;
-                        break;
-                    }
-                }
-                // Add highlight effect
-                productSelect.style.boxShadow = '0 0 0 3px rgba(45, 122, 62, 0.3)';
-                setTimeout(() => {
-                    productSelect.style.boxShadow = '';
-                }, 2000);
-            }
-        }, 800);
-    });
-});
-
-// ===================================
 // Newsletter Form Handling
 // ===================================
 const newsletterForm = document.getElementById('newsletterForm');
@@ -498,3 +457,38 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+
+
+// ===================================
+// Store Policies Modal Handler
+// ===================================
+function openPolicyModal(type = 'shipping') {
+    const modal = document.getElementById('policyModal');
+    if (!modal) return;
+    switchPolicyTab(type);
+    modal.style.display = 'flex';
+}
+window.openPolicyModal = openPolicyModal;
+
+function switchPolicyTab(type) {
+    const tabs = ['shipping', 'refund', 'privacy', 'terms'];
+    tabs.forEach(t => {
+        const tabBtn = document.getElementById(`tab-${t}`);
+        const content = document.getElementById(`policy-content-${t}`);
+        if (tabBtn) tabBtn.classList.toggle('active', t === type);
+        if (content) content.style.display = (t === type) ? 'block' : 'none';
+    });
+}
+window.switchPolicyTab = switchPolicyTab;
+
+function closePolicyModal() {
+    const modal = document.getElementById('policyModal');
+    if (modal) modal.style.display = 'none';
+}
+window.closePolicyModal = closePolicyModal;
+
+// Close policy modal when clicking outside
+window.addEventListener('click', (e) => {
+    const policyModal = document.getElementById('policyModal');
+    if (e.target === policyModal) closePolicyModal();
+});

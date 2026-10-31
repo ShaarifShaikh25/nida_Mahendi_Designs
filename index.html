@@ -3,7 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Nida Mahendi Designs - Premium organic henna products for beautiful, natural designs. Pan-India delivery available.">
+    <meta name="description" content="Nida Mahendi Designs - 100% Organic, Chemical-Free Henna Cones, Sojat Henna Powder, and Natural After-Care Oils. Handcrafted with love. Pan-India Delivery.">
+    <meta name="keywords" content="organic mehendi, organic henna cones, natural henna, bridal henna cones, henna after care oil, chemical free henna, sojat henna powder, nida mahendi designs">
+    <meta name="author" content="Nida Mahendi Designs">
+    <meta name="theme-color" content="#2d7a3e">
+
+    <!-- Open Graph / WhatsApp / Instagram Link Preview -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Nida Mahendi Designs | 100% Pure Organic Henna Products">
+    <meta property="og:description" content="Premium handcrafted organic henna cones, triple-sifted Sojat powder, and botanical after-care oil. Dark stain guarantee with 0% chemicals.">
+    <meta property="og:image" content="images/logo.png">
+    <meta property="og:site_name" content="Nida Mahendi Designs">
+
+    <!-- Twitter Preview -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Nida Mahendi Designs | 100% Pure Organic Henna Products">
+    <meta name="twitter:description" content="Premium handcrafted organic henna cones, triple-sifted Sojat powder, and botanical after-care oil. Free Pan-India Delivery.">
+    <meta name="twitter:image" content="images/logo.png">
+
+    <!-- Structured Data (JSON-LD) for Search Engine Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Nida Mahendi Designs",
+      "image": "images/logo.png",
+      "description": "Premium handcrafted 100% organic henna cones and after-care products.",
+      "telephone": "+917057167751",
+      "email": "ri76shaarif@gmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "IN"
+      },
+      "priceRange": "₹199 - ₹999",
+      "paymentAccepted": "Cash on Delivery, UPI, Online"
+    }
+    </script>
+
     <title>Nida Mahendi Designs - Organic Henna Products</title>
     <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="apple-touch-icon" href="images/logo.png">
@@ -25,55 +61,60 @@
     </div>
 
     <!-- Header & Navigation -->
-    <header class="header">
-        <nav class="navbar">
+    <header class="header" role="banner">
+        <nav class="navbar" role="navigation" aria-label="Main navigation">
             <div class="container nav-container">
-                <div class="logo">
+                <!-- Left: Logo -->
+                <a href="#home" class="logo" aria-label="Nida Mahendi Designs Home">
                     <img src="images/logo.png" alt="Nida Mahendi Designs Logo" class="logo-img">
                     <span class="brand-name">Nida Mahendi Designs</span>
-                </div>
-                <button class="mobile-menu-toggle" aria-label="Toggle menu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <ul class="nav-menu">
-                    <li><a href="#home" class="nav-link active">Home</a></li>
-                    <li><a href="#products" class="nav-link">Products</a></li>
-                    <li><a href="#about" class="nav-link">About</a></li>
-                    <li><a href="#ingredients" class="nav-link">Ingredients</a></li>
-                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </a>
+                
+                <!-- Center: Navigation Links -->
+                <ul class="nav-menu" role="menubar">
+                    <li role="none"><a href="#home" class="nav-link active" role="menuitem">Home</a></li>
+                    <li role="none"><a href="#products" class="nav-link" role="menuitem">Products</a></li>
+                    <li role="none"><a href="#about" class="nav-link" role="menuitem">About</a></li>
+                    <li role="none"><a href="#ingredients" class="nav-link" role="menuitem">Ingredients</a></li>
+                    <li role="none"><a href="#contact" class="nav-link" role="menuitem">Contact</a></li>
                 </ul>
                 
-                <!-- E-commerce Nav Actions -->
+                <!-- Right: Cart & User Actions -->
                 <div class="nav-actions">
                     <!-- Cart Button -->
-                    <button class="nav-action-btn cart-btn" onclick="openCartModal()" aria-label="Shopping Cart">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count">0</span>
+                    <button class="nav-action-btn cart-btn" onclick="openCartModal()" aria-label="Shopping Cart - 0 items">
+                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                        <span class="cart-count" aria-live="polite">0</span>
                     </button>
                     
                     <!-- Auth Buttons (shown when logged out) -->
                     <div class="auth-buttons">
-                        <button class="btn btn-signin" onclick="openAuthModal('signin')">Sign In</button>
-                        <button class="btn btn-signup" onclick="openAuthModal('signup')">Sign Up</button>
+                        <a class="btn btn-signin" href="login.html?mode=signin" aria-label="Sign in to your account">Sign In</a>
+                        <a class="btn btn-signup" href="login.html?mode=signup" aria-label="Create a new account">Sign Up</a>
                     </div>
                     
                     <!-- User Menu (shown when logged in) -->
                     <div class="user-menu" style="display: none;">
-                        <button class="nav-action-btn user-btn" onclick="toggleUserDropdown()">
-                            <i class="fas fa-user-circle"></i>
+                        <button class="nav-action-btn user-btn" onclick="toggleUserDropdown()" aria-label="User menu" aria-expanded="false" aria-haspopup="true">
+                            <i class="fas fa-user-circle" aria-hidden="true"></i>
                         </button>
-                        <div class="user-dropdown">
+                        <div class="user-dropdown" role="menu">
                             <div class="user-info">
                                 <p class="user-email"></p>
                             </div>
-                            <a href="#orders" class="dropdown-link"><i class="fas fa-box"></i> My Orders</a>
-                            <a href="#wishlist" class="dropdown-link"><i class="fas fa-heart"></i> Wishlist</a>
-                            <button onclick="signOut()" class="dropdown-link"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+                            <a href="#orders" class="dropdown-link" role="menuitem"><i class="fas fa-box" aria-hidden="true"></i> My Orders</a>
+                            <a href="#wishlist" class="dropdown-link" role="menuitem"><i class="fas fa-heart" aria-hidden="true"></i> Wishlist</a>
+                            <button onclick="signOut()" class="dropdown-link" role="menuitem"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Sign Out</button>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </button>
             </div>
         </nav>
     </header>
@@ -85,8 +126,14 @@
             <img src="images/logo.png" alt="Nida Mahendi Designs">
         </div>
         <div class="container hero-content">
+            <div class="hero-kicker">Premium organic henna | Bridal-ready | Pan-India delivery</div>
             <h1 class="hero-title">Natural Beauty, <span class="highlight">Organic Henna</span></h1>
-            <p class="hero-subtitle">Premium quality henna products for stunning designs</p>
+            <p class="hero-subtitle">Premium quality henna products for stunning designs that feel natural, look luxurious, and ship fast.</p>
+            <div class="hero-badges">
+                <span>100% Organic</span>
+                <span>Artist Trusted</span>
+                <span>Fast Delivery</span>
+            </div>
             <div class="hero-buttons">
                 <a href="#products" class="btn btn-primary">Explore Products</a>
                 <a href="#contact" class="btn btn-secondary">Get in Touch</a>
@@ -138,11 +185,11 @@
                 <p>Discover our range of premium organic henna products</p>
             </div>
             <div class="products-grid" id="productsContainer">
-                <div class="product-card" data-product-id="product-1">
+                <div class="product-card" data-product-id="00000000-0000-4000-8000-000000000001">
                     <div class="product-image">
                         <img src="images/1.jpeg" alt="Organic Henna Powder">
                         <div class="product-badge">Bestseller</div>
-                        <button class="btn-wishlist" onclick="addToWishlist('product-1')" aria-label="Add to wishlist">
+                        <button class="btn-wishlist" onclick="addToWishlist('00000000-0000-4000-8000-000000000001')" aria-label="Add to wishlist">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
@@ -161,15 +208,15 @@
                             <span class="product-price">₹299</span>
                             <span class="product-weight">100g</span>
                         </div>
-                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-1')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('00000000-0000-4000-8000-000000000001')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
 
-                <div class="product-card" data-product-id="product-2">
+                <div class="product-card" data-product-id="00000000-0000-4000-8000-000000000002">
                     <div class="product-image">
                         <img src="images/2.jpeg" alt="Ready-to-Use Henna Cones">
                         <div class="product-badge">Popular</div>
-                        <button class="btn-wishlist" onclick="addToWishlist('product-2')" aria-label="Add to wishlist">
+                        <button class="btn-wishlist" onclick="addToWishlist('00000000-0000-4000-8000-000000000002')" aria-label="Add to wishlist">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
@@ -188,14 +235,14 @@
                             <span class="product-price">₹499</span>
                             <span class="product-weight">10 pieces</span>
                         </div>
-                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-2')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('00000000-0000-4000-8000-000000000002')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
 
-                <div class="product-card" data-product-id="product-3">
+                <div class="product-card" data-product-id="00000000-0000-4000-8000-000000000003">
                     <div class="product-image">
                         <img src="images/3.jpeg" alt="Bridal Special Henna">
-                        <button class="btn-wishlist" onclick="addToWishlist('product-3')" aria-label="Add to wishlist">
+                        <button class="btn-wishlist" onclick="addToWishlist('00000000-0000-4000-8000-000000000003')" aria-label="Add to wishlist">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
@@ -214,14 +261,14 @@
                             <span class="product-price">₹799</span>
                             <span class="product-weight">250g</span>
                         </div>
-                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-3')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('00000000-0000-4000-8000-000000000003')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
 
-                <div class="product-card" data-product-id="product-4">
+                <div class="product-card" data-product-id="00000000-0000-4000-8000-000000000004">
                     <div class="product-image">
                         <img src="images/4.jpeg" alt="Henna After-Care Oil">
-                        <button class="btn-wishlist" onclick="addToWishlist('product-4')" aria-label="Add to wishlist">
+                        <button class="btn-wishlist" onclick="addToWishlist('00000000-0000-4000-8000-000000000004')" aria-label="Add to wishlist">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
@@ -240,14 +287,14 @@
                             <span class="product-price">₹199</span>
                             <span class="product-weight">50ml</span>
                         </div>
-                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-4')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('00000000-0000-4000-8000-000000000004')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
 
-                <div class="product-card" data-product-id="product-5">
+                <div class="product-card" data-product-id="00000000-0000-4000-8000-000000000005">
                     <div class="product-image">
                         <img src="images/5.jpeg" alt="Design Stencils">
-                        <button class="btn-wishlist" onclick="addToWishlist('product-5')" aria-label="Add to wishlist">
+                        <button class="btn-wishlist" onclick="addToWishlist('00000000-0000-4000-8000-000000000005')" aria-label="Add to wishlist">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
@@ -266,15 +313,15 @@
                             <span class="product-price">₹349</span>
                             <span class="product-weight">20 designs</span>
                         </div>
-                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-5')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('00000000-0000-4000-8000-000000000005')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
 
-                <div class="product-card" data-product-id="product-6">
+                <div class="product-card" data-product-id="00000000-0000-4000-8000-000000000006">
                     <div class="product-image">
                         <img src="images/6.jpeg" alt="Starter Kit">
                         <div class="product-badge">New</div>
-                        <button class="btn-wishlist" onclick="addToWishlist('product-6')" aria-label="Add to wishlist">
+                        <button class="btn-wishlist" onclick="addToWishlist('00000000-0000-4000-8000-000000000006')" aria-label="Add to wishlist">
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
@@ -294,7 +341,7 @@
                             <span class="product-original-price">₹1,299</span>
                             <span class="product-weight">Full Set</span>
                         </div>
-                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('product-6')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                        <button class="btn btn-product btn-add-to-cart" onclick="addToCart('00000000-0000-4000-8000-000000000006')"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
                 </div>
             </div>
@@ -411,8 +458,8 @@
 
     <!-- Testimonials Section -->
     <section class="testimonials">
-        <div class=\"testimonial-logo-bg\">
-            <img src=\"images/logo.png\" alt=\"Nida Mahendi Designs\">
+        <div class="testimonial-logo-bg">
+            <img src="images/logo.png" alt="Nida Mahendi Designs">
         </div>
         <div class="container">
             <div class="section-header">
@@ -480,28 +527,26 @@
                         <i class="fas fa-phone"></i>
                         <div>
                             <h4>Phone / WhatsApp</h4>
-                            <p>+91 70571XXXXX</p>
+                            <p><a href="tel:+917057167751" style="color: inherit; text-decoration: none; font-weight: 600;">+91 7057167751</a></p>
                         </div>
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-envelope"></i>
                         <div>
                             <h4>Email</h4>
-                            <p>ri76shaarif@gmail.com</p>
+                            <p><a href="mailto:ri76shaarif@gmail.com" style="color: inherit; text-decoration: none;">ri76shaarif@gmail.com</a></p>
                         </div>
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-map-marker-alt"></i>
                         <div>
-                            <h4>Location</h4>
-                            <p>Pan-India Delivery Available</p>
+                            <h4>Dispatch & Location</h4>
+                            <p>Fresh Batch Handcrafted in India • Pan-India Delivery</p>
                         </div>
                     </div>
                     <div class="social-links">
-                        <a href="https://www.instagram.com/nida_mahendi_designs/?hl=en" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
-                        <a href="https://wa.me/917057167751?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20your%20henna%20products" target="_blank" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                        <a href="https://www.facebook.com/" target="_blank" class="social-link"><i class="fab fa-facebook"></i></a>
-                        <a href="https://www.youtube.com/" target="_blank" class="social-link"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.instagram.com/nida_mahendi_designs/?hl=en" target="_blank" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://wa.me/917057167751?text=Hi%20Nida%20Mahendi%20Designs%2C%20I%20have%20an%20inquiry%20regarding%20your%20organic%20henna%20products" target="_blank" class="social-link" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
                 <div class="contact-form-wrapper">
@@ -510,6 +555,7 @@
                         <input type="hidden" name="subject" value="New Contact from Nida Mahendi Designs Website">
                         <input type="hidden" name="from_name" value="Nida Mahendi Designs Website">
                         <input type="hidden" name="redirect" value="false">
+                        <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
                         
                         <div class="form-group">
                             <label for="name">Your Name *</label>
@@ -566,12 +612,12 @@
                     </ul>
                 </div>
                 <div class="footer-col">
-                    <h3>Products</h3>
+                    <h3>Store Policies</h3>
                     <ul>
-                        <li><a href="#products">Henna Powder</a></li>
-                        <li><a href="#products">Henna Cones</a></li>
-                        <li><a href="#products">Bridal Special</a></li>
-                        <li><a href="#products">Starter Kits</a></li>
+                        <li><a href="javascript:void(0)" onclick="openPolicyModal('shipping')">Shipping & Delivery</a></li>
+                        <li><a href="javascript:void(0)" onclick="openPolicyModal('refund')">Refund & Cancellation</a></li>
+                        <li><a href="javascript:void(0)" onclick="openPolicyModal('privacy')">Privacy Policy</a></li>
+                        <li><a href="javascript:void(0)" onclick="openPolicyModal('terms')">Terms & Conditions</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -596,6 +642,74 @@
     <button id="scrollTop" class="scroll-top" aria-label="Scroll to top">
         <i class="fas fa-arrow-up"></i>
     </button>
+
+    <!-- Store Policies Modal (Compliance & Legal) -->
+    <div id="policyModal" class="modal" role="dialog" aria-labelledby="policyModalTitle" aria-modal="true">
+        <div class="modal-content policy-modal" style="max-width: 760px; border-radius: 24px; padding: 0; overflow: hidden; background: #fff;">
+            <div class="modal-header" style="background: var(--light-bg); padding: 20px 28px; border-bottom: 1px solid var(--border-color);">
+                <h2 id="policyModalTitle" style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--primary-color); display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-shield-alt"></i> Store Policies & Customer Protection
+                </h2>
+                <button class="modal-close" onclick="closePolicyModal()" aria-label="Close policies">&times;</button>
+            </div>
+            <div class="policy-tabs" style="display: flex; border-bottom: 1px solid var(--border-color); background: #faf9f6; overflow-x: auto;">
+                <button class="policy-tab active" id="tab-shipping" onclick="switchPolicyTab('shipping')"><i class="fas fa-truck"></i> Shipping & Delivery</button>
+                <button class="policy-tab" id="tab-refund" onclick="switchPolicyTab('refund')"><i class="fas fa-undo"></i> Cancellation & Refund</button>
+                <button class="policy-tab" id="tab-privacy" onclick="switchPolicyTab('privacy')"><i class="fas fa-user-shield"></i> Privacy Policy</button>
+                <button class="policy-tab" id="tab-terms" onclick="switchPolicyTab('terms')"><i class="fas fa-file-contract"></i> Terms of Service</button>
+            </div>
+            <div class="policy-body" style="padding: 26px 30px; max-height: 60vh; overflow-y: auto; font-size: 14px; line-height: 1.7; color: var(--text-dark);">
+                <!-- Shipping Policy -->
+                <div id="policy-content-shipping" class="policy-content">
+                    <h3 style="color: var(--primary-color); margin-bottom: 8px;">Shipping & Delivery Policy</h3>
+                    <p>At <strong>Nida Mahendi Designs</strong>, we freshly prepare our 100% organic, chemical-free henna cones in small artisan batches to guarantee maximum stain potency.</p>
+                    <ul style="padding-left: 20px; margin: 12px 0;">
+                        <li><strong>Dispatch Schedule:</strong> Fresh batches are freshly mixed, rolled, and dispatched within <strong>24 to 48 hours</strong> of order placement.</li>
+                        <li><strong>Delivery Timelines:</strong> Standard Pan-India delivery takes <strong>3 to 6 business days</strong> depending on your pincode. Express courier partners include BlueDart, Delhivery, and India Post Speed Post.</li>
+                        <li><strong>Shipping Charges:</strong> We offer <strong>FREE Pan-India Shipping</strong> on all prepaid & COD orders.</li>
+                        <li><strong>❄️ Critical Freshness Instruction:</strong> Because our henna contains ZERO preservatives or toxic chemical dyes (No PPD), you <em>must</em> freeze the cones upon arrival if not using them immediately. Stored frozen, they remain fresh for up to 6 months!</li>
+                    </ul>
+                </div>
+
+                <!-- Refund Policy -->
+                <div id="policy-content-refund" class="policy-content" style="display: none;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 8px;">Cancellation & Refund Policy</h3>
+                    <p>Customer satisfaction is our utmost priority. Because fresh henna cones and organic pastes are perishable personal cosmetics, please review our policy:</p>
+                    <ul style="padding-left: 20px; margin: 12px 0;">
+                        <li><strong>Damaged or Leaking Parcels:</strong> In the rare event of transit damage or leakage, please notify us within <strong>48 hours of delivery</strong> via WhatsApp at <strong>+91 7057167751</strong> with photos/unboxing video. We will issue an <strong>immediate 100% free replacement or full refund</strong>.</li>
+                        <li><strong>Order Cancellations:</strong> You can cancel your order free of charge before the batch has been dispatched (within 12 hours of placing the order).</li>
+                        <li><strong>Returns:</strong> Due to hygiene and perishability, once cones are opened or defrosted, physical returns cannot be accepted.</li>
+                    </ul>
+                </div>
+
+                <!-- Privacy Policy -->
+                <div id="policy-content-privacy" class="policy-content" style="display: none;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 8px;">Privacy Policy</h3>
+                    <p>We respect your privacy. This policy outlines how we handle your personal information:</p>
+                    <ul style="padding-left: 20px; margin: 12px 0;">
+                        <li><strong>Information Collected:</strong> Your name, phone number, delivery address, and email are collected solely to process and ship your henna orders.</li>
+                        <li><strong>Zero Third-Party Sharing:</strong> We NEVER sell, rent, or share your contact or address details with third-party advertisers. Data is shared only with verified courier partners for doorstep delivery.</li>
+                        <li><strong>Data Security:</strong> Your passwords and account credentials are encrypted and securely authenticated via Supabase PostgreSQL cloud infrastructure.</li>
+                    </ul>
+                </div>
+
+                <!-- Terms Policy -->
+                <div id="policy-content-terms" class="policy-content" style="display: none;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 8px;">Terms of Service</h3>
+                    <p>By purchasing from <strong>Nida Mahendi Designs</strong>, you agree to the following terms:</p>
+                    <ul style="padding-left: 20px; margin: 12px 0;">
+                        <li><strong>100% Natural Guarantee:</strong> All henna powder and cones are prepared strictly with organic Lawsonia Inermis, eucalyptus, tea tree, and natural sugar. Absolutely no PPD, sodium picramate, or chemical preservatives are used.</li>
+                        <li><strong>Skin Patch Test:</strong> While our organic henna is suitable for sensitive skin, natural essential oils may cause mild sensitivity in rare individuals. We advise performing a 24-hour small skin patch test before full bridal application.</li>
+                        <li><strong>Customer Support:</strong> For any grievances or questions, contact us directly at <strong>ri76shaarif@gmail.com</strong> or WhatsApp <strong>+91 7057167751</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="background: #faf9f6; padding: 14px 28px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: var(--text-light);">Nida Mahendi Designs • Pan-India Compliance</span>
+                <button type="button" class="btn btn-secondary" onclick="closePolicyModal()" style="padding: 8px 20px; font-size: 13px;">Close</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Authentication Modal -->
     <div id="authModal" class="modal">
@@ -668,6 +782,184 @@
         </div>
     </div>
 
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal" role="dialog" aria-labelledby="checkoutTitle" aria-modal="true">
+        <div class="modal-content checkout-modal">
+            <div class="modal-header">
+                <h2 id="checkoutTitle"><i class="fas fa-lock"></i> Secure Checkout</h2>
+                <button class="modal-close" onclick="closeCheckoutModal()" aria-label="Close checkout">&times;</button>
+            </div>
+            <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
+                <div class="modal-body checkout-body">
+                    <div class="checkout-grid">
+                        <!-- Left: Customer & Delivery Details -->
+                        <div class="checkout-form-col">
+                            <h3 class="checkout-section-title"><i class="fas fa-map-marker-alt"></i> Shipping & Contact Details</h3>
+                            
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label for="checkout-name">Full Name *</label>
+                                    <input type="text" id="checkout-name" name="full_name" required placeholder="e.g. Priya Sharma">
+                                </div>
+                                <div class="form-group">
+                                    <label for="checkout-phone">10-Digit Mobile / WhatsApp *</label>
+                                    <div class="phone-input-group">
+                                        <span class="phone-prefix">+91</span>
+                                        <input type="tel" id="checkout-phone" name="phone" required pattern="[6-9][0-9]{9}" placeholder="9876543210" maxlength="10">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="checkout-email">Email Address (for order receipt) *</label>
+                                <input type="email" id="checkout-email" name="email" required placeholder="your@email.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="checkout-address">Delivery Address (House/Flat No, Street, Landmark) *</label>
+                                <textarea id="checkout-address" name="address" rows="2" required placeholder="e.g. Flat 302, Lotus Tower, Near Station"></textarea>
+                            </div>
+
+                            <div class="form-row-3">
+                                <div class="form-group">
+                                    <label for="checkout-city">City *</label>
+                                    <input type="text" id="checkout-city" name="city" required placeholder="e.g. Mumbai">
+                                </div>
+                                <div class="form-group">
+                                    <label for="checkout-state">State *</label>
+                                    <input type="text" id="checkout-state" name="state" required placeholder="e.g. Maharashtra" value="Maharashtra">
+                                </div>
+                                <div class="form-group">
+                                    <label for="checkout-pincode">PIN Code *</label>
+                                    <input type="text" id="checkout-pincode" name="pincode" required pattern="[1-9][0-9]{5}" maxlength="6" placeholder="400001">
+                                </div>
+                            </div>
+
+                            <h3 class="checkout-section-title" style="margin-top: 20px;"><i class="fas fa-credit-card"></i> Payment Method</h3>
+                            <div class="payment-options">
+                                <label class="payment-option selected">
+                                    <input type="radio" name="payment_method" value="COD" checked onchange="updatePaymentSelection(this)">
+                                    <div class="payment-option-content">
+                                        <div class="payment-option-header">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            <strong>Cash on Delivery (COD)</strong>
+                                            <span class="badge-mini">Popular</span>
+                                        </div>
+                                        <p>Pay with cash or UPI when your fresh henna arrives.</p>
+                                    </div>
+                                </label>
+
+                                <label class="payment-option">
+                                    <input type="radio" name="payment_method" value="UPI" onchange="updatePaymentSelection(this)">
+                                    <div class="payment-option-content">
+                                        <div class="payment-option-header">
+                                            <i class="fas fa-qrcode"></i>
+                                            <strong>Instant UPI / QR Pay</strong>
+                                        </div>
+                                        <p>Pay via Google Pay, PhonePe, Paytm or any UPI App.</p>
+                                    </div>
+                                </label>
+
+                                <label class="payment-option">
+                                    <input type="radio" name="payment_method" value="WhatsApp" onchange="updatePaymentSelection(this)">
+                                    <div class="payment-option-content">
+                                        <div class="payment-option-header">
+                                            <i class="fab fa-whatsapp" style="color: #25D366;"></i>
+                                            <strong>Direct WhatsApp Order</strong>
+                                        </div>
+                                        <p>Send pre-filled receipt to our official WhatsApp for fast confirmation.</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Right: Order Items & Summary -->
+                        <div class="checkout-summary-col">
+                            <h3 class="checkout-section-title"><i class="fas fa-receipt"></i> Order Summary</h3>
+                            
+                            <div class="checkout-items-preview" id="checkoutItemsPreview">
+                                <!-- Populated dynamically -->
+                            </div>
+
+                            <div class="checkout-price-card">
+                                <div class="summary-line">
+                                    <span>Items Subtotal</span>
+                                    <span id="checkoutSubtotal">₹0</span>
+                                </div>
+                                <div class="summary-line">
+                                    <span>Pan-India Shipping</span>
+                                    <span class="text-success"><i class="fas fa-check-circle"></i> FREE</span>
+                                </div>
+                                <div class="summary-line">
+                                    <span>Packaging & Handling</span>
+                                    <span class="text-success">₹0</span>
+                                </div>
+                                <hr class="summary-divider">
+                                <div class="summary-line total-line">
+                                    <strong>Total Payable:</strong>
+                                    <strong class="total-price" id="checkoutTotal">₹0</strong>
+                                </div>
+                            </div>
+
+                            <div class="delivery-trust-box">
+                                <p><i class="fas fa-snowflake" style="color: var(--primary-color);"></i> <strong>Freshness Notice:</strong> Cones are freshly prepared without chemicals. Keep refrigerated upon arrival for optimal stain depth.</p>
+                            </div>
+
+                            <button type="submit" id="submitOrderBtn" class="btn btn-primary btn-block checkout-submit-btn">
+                                <i class="fas fa-lock"></i> Place Order Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Success Modal -->
+    <div id="orderSuccessModal" class="modal" role="dialog" aria-labelledby="orderSuccessTitle" aria-modal="true">
+        <div class="modal-content order-success-modal">
+            <div class="order-success-content">
+                <div class="success-icon-wrap">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 id="orderSuccessTitle">Order Placed Successfully!</h2>
+                <p class="order-success-subtitle">Thank you for your order! Your organic henna products are being prepared with care.</p>
+                
+                <div class="order-details-card">
+                    <div class="order-detail-row">
+                        <span>Order Number:</span>
+                        <strong id="successOrderNumber">NMD-XXXXXX</strong>
+                    </div>
+                    <div class="order-detail-row">
+                        <span>Customer:</span>
+                        <strong id="successCustomerName">-</strong>
+                    </div>
+                    <div class="order-detail-row">
+                        <span>Delivery To:</span>
+                        <span id="successDeliveryAddress" style="text-align: right; max-width: 250px;">-</span>
+                    </div>
+                    <div class="order-detail-row">
+                        <span>Payment Mode:</span>
+                        <strong id="successPaymentMethod">Cash on Delivery</strong>
+                    </div>
+                    <div class="order-detail-row total-highlight">
+                        <span>Total Amount:</span>
+                        <strong id="successTotalAmount">₹0</strong>
+                    </div>
+                </div>
+
+                <div class="order-actions-wrap">
+                    <a id="successWhatsAppBtn" href="#" target="_blank" class="btn btn-whatsapp btn-block">
+                        <i class="fab fa-whatsapp"></i> Track / Confirm on WhatsApp
+                    </a>
+                    <button type="button" class="btn btn-secondary btn-block" onclick="closeOrderSuccessModal()">
+                        Continue Shopping
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/script.js"></script>
     <script src="js/supabase-config.js"></script>
@@ -675,3 +967,4 @@
     <script src="js/realtime-products.js"></script>
 </body>
 </html>
+

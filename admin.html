@@ -260,11 +260,16 @@
         </div>
 
         <!-- Products Section -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
             <h2>Products Management</h2>
-            <button onclick="openProductModal()" class="btn-add-product">
-                <i class="fas fa-plus"></i> Add New Product
-            </button>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="seedDefaultProducts()" class="btn btn-secondary" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-sync"></i> Sync Default Catalog to DB
+                </button>
+                <button onclick="openProductModal()" class="btn-add-product">
+                    <i class="fas fa-plus"></i> Add New Product
+                </button>
+            </div>
         </div>
 
         <div class="products-table">
@@ -283,6 +288,39 @@
                 <tbody id="productsTableBody">
                     <tr>
                         <td colspan="7" style="text-align: center; padding: 40px;">Loading products...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Orders Management Section -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 20px;">
+            <div>
+                <h2>Customer Orders</h2>
+                <p style="color: var(--text-light); font-size: 14px;">Live customer orders, shipping addresses & payment status</p>
+            </div>
+            <button onclick="loadOrders()" class="btn btn-secondary" style="display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-sync"></i> Refresh Orders
+            </button>
+        </div>
+
+        <div class="products-table" style="margin-bottom: 50px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Contact</th>
+                        <th>Shipping Address</th>
+                        <th>Amount</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-light);">Loading orders...</td>
                     </tr>
                 </tbody>
             </table>
@@ -378,7 +416,29 @@
         </div>
     </div>
 
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content large" style="max-width: 680px; border-radius: 20px; overflow: hidden;">
+            <div class="modal-header">
+                <h2><i class="fas fa-receipt"></i> Order <span id="detailOrderNumber"></span></h2>
+                <button class="modal-close" onclick="closeOrderDetailsModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <div id="orderDetailsContent">
+                    <!-- Populated dynamically -->
+                </div>
+                <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
+                    <a id="detailWhatsAppBtn" href="#" target="_blank" class="btn" style="background: #25D366; color: white; display: flex; align-items: center; gap: 8px;">
+                        <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+                    </a>
+                    <button type="button" class="btn btn-secondary" onclick="closeOrderDetailsModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/supabase-config.js"></script>
+    <script src="js/realtime-products.js"></script>
     <script src="js/admin.js"></script>
 </body>
 </html>

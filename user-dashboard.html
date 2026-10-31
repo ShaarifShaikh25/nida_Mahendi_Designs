@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="User dashboard for Nida Mahendi Designs customers.">
+    <title>User Dashboard - Nida Mahendi Designs</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .dashboard-shell {
+            min-height: 100vh;
+            padding: 110px 0 60px;
+            background:
+                radial-gradient(circle at top left, rgba(45, 122, 62, 0.12), transparent 28%),
+                radial-gradient(circle at 90% 10%, rgba(212, 175, 55, 0.14), transparent 24%),
+                linear-gradient(180deg, #fbf8f3 0%, #f5efe7 100%);
+        }
+
+        .dashboard-wrap {
+            width: min(100% - 2rem, 1180px);
+            margin: 0 auto;
+        }
+
+        .dashboard-hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 28px;
+            padding: 28px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(45, 122, 62, 0.12);
+            box-shadow: 0 18px 50px rgba(27, 35, 20, 0.12);
+            backdrop-filter: blur(18px);
+        }
+
+        .dashboard-title h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3.25rem);
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-title p {
+            color: var(--text-light);
+            max-width: 58ch;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-actions .btn {
+            border-radius: 999px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(45, 122, 62, 0.12);
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: 0 14px 30px rgba(27, 35, 20, 0.1);
+        }
+
+        .dashboard-card .label {
+            color: var(--text-light);
+            font-size: 0.92rem;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-card .value {
+            font-size: clamp(1.75rem, 3vw, 2.6rem);
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+
+        .dashboard-card .subtext {
+            margin-top: 8px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .dashboard-panel {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(45, 122, 62, 0.12);
+            border-radius: 28px;
+            box-shadow: 0 18px 50px rgba(27, 35, 20, 0.12);
+            overflow: hidden;
+        }
+
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            padding: 22px 24px;
+            border-bottom: 1px solid rgba(45, 122, 62, 0.08);
+        }
+
+        .panel-head h2 {
+            font-size: 1.35rem;
+            color: var(--text-dark);
+        }
+
+        .panel-body {
+            padding: 24px;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #fff 0%, #f8fbf7 100%);
+            border: 1px solid rgba(45, 122, 62, 0.1);
+            color: var(--text-dark);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .quick-link:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(27, 35, 20, 0.12);
+        }
+
+        .quick-link i {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2d7a3e, #1f5d2d);
+            color: white;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .quick-link strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .quick-link span {
+            color: var(--text-light);
+            font-size: 0.92rem;
+        }
+
+        .dashboard-note {
+            margin-top: 18px;
+            padding: 18px 20px;
+            border-radius: 18px;
+            background: rgba(45, 122, 62, 0.08);
+            color: var(--text-dark);
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-hero {
+                flex-direction: column;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .dashboard-shell {
+                padding-top: 96px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dashboard-actions {
+                width: 100%;
+            }
+
+            .dashboard-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-shell">
+        <div class="dashboard-wrap">
+            <section class="dashboard-hero">
+                <div class="dashboard-title">
+                    <p class="hero-kicker" style="color: var(--primary-color); background: rgba(45, 122, 62, 0.08); border-color: rgba(45, 122, 62, 0.12);">Customer dashboard</p>
+                    <h1>Welcome back</h1>
+                    <p id="userGreeting">Loading your account details...</p>
+                </div>
+                <div class="dashboard-actions">
+                    <a href="index.html" class="btn btn-secondary"><i class="fas fa-store"></i> Back to Store</a>
+                    <button id="logoutBtn" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </section>
+
+            <section class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="label">Account</div>
+                    <div class="value" id="accountStatus">--</div>
+                    <div class="subtext">Signed in customer</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="label">Cart Items</div>
+                    <div class="value" id="cartCount">0</div>
+                    <div class="subtext">Saved items in cart</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="label">Wishlist</div>
+                    <div class="value" id="wishlistCount">0</div>
+                    <div class="subtext">Favorite products</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="label">Orders</div>
+                    <div class="value" id="orderCount">0</div>
+                    <div class="subtext">Previous purchases</div>
+                </div>
+            </section>
+
+            <section class="dashboard-panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>Your quick actions</h2>
+                        <p style="color: var(--text-light); margin-top: 6px;">Jump straight back into shopping or account management.</p>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="quick-links">
+                        <a class="quick-link" href="index.html#products">
+                            <i class="fas fa-bag-shopping"></i>
+                            <div>
+                                <strong>Shop Products</strong>
+                                <span>Browse the latest henna products</span>
+                            </div>
+                        </a>
+                        <a class="quick-link" href="index.html#contact">
+                            <i class="fas fa-message"></i>
+                            <div>
+                                <strong>Contact Support</strong>
+                                <span>Send a message for help or orders</span>
+                            </div>
+                        </a>
+                        <a class="quick-link" href="index.html#products">
+                            <i class="fas fa-heart"></i>
+                            <div>
+                                <strong>Wishlist</strong>
+                                <span>Review items you saved</span>
+                            </div>
+                        </a>
+                        <a class="quick-link" href="index.html">
+                            <i class="fas fa-arrow-left"></i>
+                            <div>
+                                <strong>Return Home</strong>
+                                <span>Go back to the storefront</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="dashboard-note" id="dashboardNote">
+                        Sign in to see your account overview and shopping details.
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        async function loadDashboard() {
+            if (!supabaseClient) {
+                setTimeout(loadDashboard, 100);
+                return;
+            }
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            currentUser = session.user;
+            const { data: customer } = await supabaseClient
+                .from('customers')
+                .select('full_name, email, is_admin')
+                .eq('id', session.user.id)
+                .single();
+
+            if (customer?.is_admin) {
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            document.getElementById('userGreeting').textContent = `Hello, ${customer?.full_name || session.user.email}. This is your personal dashboard.`;
+            document.getElementById('accountStatus').textContent = 'Active';
+            document.getElementById('dashboardNote').textContent = 'Your cart, wishlist, and orders are linked to your account. Use the store to continue shopping.';
+
+            const { data: dbCart } = await supabaseClient
+                .from('cart')
+                .select('id')
+                .eq('customer_id', session.user.id);
+            const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+            document.getElementById('cartCount').textContent = (dbCart && dbCart.length > 0) ? dbCart.length : guestCart.length;
+
+            const { data: wishlist } = await supabaseClient
+                .from('wishlist')
+                .select('id')
+                .eq('customer_id', session.user.id);
+            document.getElementById('wishlistCount').textContent = wishlist?.length || 0;
+
+            const { data: orders } = await supabaseClient
+                .from('orders')
+                .select('*')
+                .eq('customer_id', session.user.id)
+                .order('created_at', { ascending: false });
+            const localOrders = JSON.parse(localStorage.getItem('user_orders') || '[]');
+            const count = (orders && orders.length > 0) ? orders.length : localOrders.length;
+            document.getElementById('orderCount').textContent = count;
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await signOut();
+        });
+
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

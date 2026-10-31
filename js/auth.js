@@ -10,7 +10,8 @@ async function signUp(email, password, fullName) {
         options: {
             data: {
                 full_name: fullName
-            }
+            },
+            emailRedirectTo: window.location.origin
         }
     });
     
@@ -19,24 +20,16 @@ async function signUp(email, password, fullName) {
         return null;
     }
     
-    // Create customer record
-    if (data.user) {
-        const { error: customerError } = await supabaseClient
-            .from('customers')
-            .insert([
-                {
-                    id: data.user.id,
-                    email: email,
-                    full_name: fullName
-                }
-            ]);
-        
-        if (customerError) {
-            console.error('Error creating customer:', customerError);
-        }
+    // Customer record is automatically created by database trigger
+    // No need to manually insert into customers table
+    
+    // Check if email confirmation is required
+    if (data.user && !data.session) {
+        showNotification('Sign up successful! Please check your email to verify your account before signing in.', 'success');
+    } else {
+        showNotification('Sign up successful! You can now sign in.', 'success');
     }
     
-    showNotification('Sign up successful! Please check your email to verify.', 'success');
     return data;
 }
 
@@ -48,11 +41,31 @@ async function signIn(email, password) {
     });
     
     if (error) {
-        showNotification(error.message, 'error');
+        // Provide more helpful error messages
+        if (error.message.includes('Email not confirmed') || error.message.includes('email_not_confirmed')) {
+            showNotification('Please verify your email first! Check your inbox for the confirmation link.', 'error');
+        } else if (error.message.includes('Invalid login credentials')) {
+            showNotification('Invalid email or password. Please try again.', 'error');
+        } else {
+            showNotification(error.message, 'error');
+        }
         return null;
     }
     
     showNotification('Welcome back!', 'success');
+
+    const { data: customer } = await supabaseClient
+        .from('customers')
+        .select('is_admin, full_name, email')
+        .eq('id', data.user.id)
+        .single();
+
+    if (customer?.is_admin) {
+        window.location.href = 'admin.html';
+    } else {
+        window.location.href = 'user-dashboard.html';
+    }
+
     return data;
 }
 
@@ -66,7 +79,7 @@ async function signOut() {
     }
     
     showNotification('Signed out successfully', 'success');
-    window.location.reload();
+    window.location.href = 'login.html?mode=signin';
 }
 
 // ===================================
@@ -137,11 +150,22 @@ async function loadCartItems() {
         
         // Get product details for each cart item
         for (const item of guestCart) {
-            const { data: product } = await supabaseClient
-                .from('products')
-                .select('*')
-                .eq('id', item.productId)
-                .single();
+            let product = null;
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { data } = await supabaseClient
+                        .from('products')
+                        .select('*')
+                        .eq('id', item.productId)
+                        .single();
+                    product = data;
+                } catch (e) {}
+            }
+            
+            // Fallback to local default catalog
+            if (!product && typeof window.getProductById === 'function') {
+                product = window.getProductById(item.productId);
+            }
             
             if (product) {
                 cartItems.push({
@@ -162,8 +186,13 @@ async function loadCartItems() {
             .eq('customer_id', currentUser.id);
         
         if (data) {
-            cartItems = data;
-            total = data.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+            cartItems = data.map(item => {
+                if (!item.product && typeof window.getProductById === 'function') {
+                    item.product = window.getProductById(item.product_id);
+                }
+                return item;
+            }).filter(item => item.product);
+            total = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
         }
     }
     
@@ -178,7 +207,7 @@ async function loadCartItems() {
         const product = item.product;
         return `
             <div class="cart-item" data-item-id="${item.productId || item.product_id}">
-                <img src="${product.image_url}" alt="${product.name}">
+                <img src="${product.image_url || 'images/1.jpeg'}" alt="${product.name}" onerror="this.src='images/1.jpeg'; this.onerror=null;">
                 <div class="cart-item-details">
                     <h4>${product.name}</h4>
                     <p class="cart-item-price">₹${product.price}</p>
@@ -328,21 +357,300 @@ function updateWishlistButton(productId, isInWishlist) {
 }
 
 // ===================================
-// Checkout Function
+// Checkout & Order Placement System
 // ===================================
 
-function proceedToCheckout() {
+let activeCheckoutItems = [];
+let activeCheckoutTotal = 0;
+
+async function proceedToCheckout() {
+    let cartItems = [];
+    let total = 0;
+
     if (!currentUser) {
-        closeCartModal();
-        showNotification('Please sign in to checkout', 'info');
-        openAuthModal('signin');
+        const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+        if (guestCart.length === 0) {
+            showNotification('Your cart is empty! Please add some products.', 'info');
+            return;
+        }
+
+        for (const item of guestCart) {
+            let product = null;
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { data } = await supabaseClient
+                        .from('products')
+                        .select('*')
+                        .eq('id', item.productId)
+                        .single();
+                    product = data;
+                } catch(e) {}
+            }
+            if (!product && typeof window.getProductById === 'function') {
+                product = window.getProductById(item.productId);
+            }
+            if (product) {
+                cartItems.push({
+                    ...item,
+                    product: product
+                });
+                total += product.price * item.quantity;
+            }
+        }
+    } else {
+        const { data } = await supabaseClient
+            .from('cart')
+            .select(`*, product:products(*)`)
+            .eq('customer_id', currentUser.id);
+
+        if (!data || data.length === 0) {
+            showNotification('Your cart is empty! Please add some products.', 'info');
+            return;
+        }
+
+        cartItems = data.map(item => {
+            if (!item.product && typeof window.getProductById === 'function') {
+                item.product = window.getProductById(item.product_id);
+            }
+            return item;
+        }).filter(item => item.product);
+
+        total = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    }
+
+    if (cartItems.length === 0) {
+        showNotification('Your cart is empty!', 'info');
         return;
     }
-    
-    // Here you would typically redirect to a checkout page
-    // For now, we'll show a message
-    showNotification('Checkout functionality coming soon! Please contact us to complete your order.', 'info');
+
+    activeCheckoutItems = cartItems;
+    activeCheckoutTotal = total;
+
+    closeCartModal();
+    openCheckoutModal();
 }
+window.proceedToCheckout = proceedToCheckout;
+
+function openCheckoutModal() {
+    const modal = document.getElementById('checkoutModal');
+    if (!modal) return;
+
+    if (currentUser) {
+        const emailInput = document.getElementById('checkout-email');
+        const nameInput = document.getElementById('checkout-name');
+        if (emailInput && currentUser.email) emailInput.value = currentUser.email;
+        if (nameInput && currentUser.user_metadata?.full_name) {
+            nameInput.value = currentUser.user_metadata.full_name;
+        }
+    }
+
+    const previewContainer = document.getElementById('checkoutItemsPreview');
+    if (previewContainer) {
+        previewContainer.innerHTML = activeCheckoutItems.map(item => {
+            const p = item.product;
+            return `
+                <div class="checkout-item-mini">
+                    <img src="${p.image_url || 'images/1.jpeg'}" alt="${p.name}" onerror="this.src='images/1.jpeg'; this.onerror=null;">
+                    <div class="checkout-item-mini-info">
+                        <h4>${p.name}</h4>
+                        <p>Qty: ${item.quantity} ${p.weight ? `• ${p.weight}` : ''}</p>
+                    </div>
+                    <div class="checkout-item-mini-price">
+                        ₹${p.price * item.quantity}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    const subtotalEl = document.getElementById('checkoutSubtotal');
+    const totalEl = document.getElementById('checkoutTotal');
+    const submitBtn = document.getElementById('submitOrderBtn');
+
+    if (subtotalEl) subtotalEl.textContent = `₹${activeCheckoutTotal}`;
+    if (totalEl) totalEl.textContent = `₹${activeCheckoutTotal}`;
+    if (submitBtn) {
+        submitBtn.innerHTML = `<i class="fas fa-lock"></i> Place Cash on Delivery Order (₹${activeCheckoutTotal})`;
+    }
+
+    modal.style.display = 'flex';
+}
+window.openCheckoutModal = openCheckoutModal;
+
+function closeCheckoutModal() {
+    const modal = document.getElementById('checkoutModal');
+    if (modal) modal.style.display = 'none';
+}
+window.closeCheckoutModal = closeCheckoutModal;
+
+function updatePaymentSelection(radioInput) {
+    document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
+    if (radioInput && radioInput.closest('.payment-option')) {
+        radioInput.closest('.payment-option').classList.add('selected');
+    }
+
+    const submitBtn = document.getElementById('submitOrderBtn');
+    if (!submitBtn) return;
+
+    if (radioInput.value === 'COD') {
+        submitBtn.innerHTML = `<i class="fas fa-lock"></i> Place Cash on Delivery Order (₹${activeCheckoutTotal})`;
+    } else if (radioInput.value === 'UPI') {
+        submitBtn.innerHTML = `<i class="fas fa-qrcode"></i> Proceed to Pay via UPI (₹${activeCheckoutTotal})`;
+    } else if (radioInput.value === 'WhatsApp') {
+        submitBtn.innerHTML = `<i class="fab fa-whatsapp"></i> Confirm & Place on WhatsApp (₹${activeCheckoutTotal})`;
+    }
+}
+window.updatePaymentSelection = updatePaymentSelection;
+
+async function handlePlaceOrder(e) {
+    e.preventDefault();
+
+    const form = document.getElementById('checkoutForm');
+    const submitBtn = document.getElementById('submitOrderBtn');
+    if (!form || !submitBtn) return;
+
+    const formData = new FormData(form);
+    const fullName = formData.get('full_name')?.trim();
+    const phone = formData.get('phone')?.trim();
+    const email = formData.get('email')?.trim();
+    const address = formData.get('address')?.trim();
+    const city = formData.get('city')?.trim();
+    const state = formData.get('state')?.trim();
+    const pincode = formData.get('pincode')?.trim();
+    const paymentMethod = formData.get('payment_method') || 'COD';
+
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+        showNotification('Please enter a valid 10-digit Indian phone number.', 'error');
+        return;
+    }
+
+    const pinRegex = /^[1-9]\d{5}$/;
+    if (!pinRegex.test(pincode)) {
+        showNotification('Please enter a valid 6-digit PIN code.', 'error');
+        return;
+    }
+
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Order...';
+
+    const orderNumber = `NMD-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 900 + 100)}`;
+
+    const shippingAddress = {
+        full_name: fullName,
+        phone: phone,
+        email: email,
+        address: address,
+        city: city,
+        state: state,
+        pincode: pincode
+    };
+
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            const orderPayload = {
+                order_number: orderNumber,
+                total_amount: activeCheckoutTotal,
+                status: 'pending',
+                shipping_address: shippingAddress,
+                payment_method: paymentMethod
+            };
+
+            if (currentUser && currentUser.id) {
+                orderPayload.customer_id = currentUser.id;
+            }
+
+            const { data: orderData, error: orderError } = await supabaseClient
+                .from('orders')
+                .insert([orderPayload])
+                .select()
+                .single();
+
+            if (!orderError && orderData) {
+                const orderItemsPayload = activeCheckoutItems.map(item => ({
+                    order_id: orderData.id,
+                    product_id: item.productId || item.product_id,
+                    quantity: item.quantity,
+                    price: item.product.price
+                }));
+
+                await supabaseClient.from('order_items').insert(orderItemsPayload);
+            }
+        } catch (dbErr) {
+            console.warn('Database order logging note:', dbErr);
+        }
+    }
+
+    const localOrders = JSON.parse(localStorage.getItem('user_orders') || '[]');
+    localOrders.unshift({
+        order_number: orderNumber,
+        items: activeCheckoutItems.map(i => ({ name: i.product.name, qty: i.quantity, price: i.product.price })),
+        total: activeCheckoutTotal,
+        payment_method: paymentMethod,
+        shipping: shippingAddress,
+        date: new Date().toISOString()
+    });
+    localStorage.setItem('user_orders', JSON.stringify(localOrders));
+
+    localStorage.removeItem('guestCart');
+    if (currentUser && typeof supabaseClient !== 'undefined' && supabaseClient) {
+        await supabaseClient.from('cart').delete().eq('customer_id', currentUser.id);
+    }
+    updateCartCount(0);
+
+    const itemsSummaryText = activeCheckoutItems.map(i => `• ${i.product.name} (Qty: ${i.quantity}) - ₹${i.product.price * i.quantity}`).join('%0A');
+    const waText = `🌿 *NEW ORDER - Nida Mahendi Designs*%0A` +
+        `━━━━━━━━━━━━━━━━━━━━%0A` +
+        `📦 *Order ID:* ${orderNumber}%0A` +
+        `👤 *Name:* ${encodeURIComponent(fullName)}%0A` +
+        `📞 *Phone:* ${phone}%0A` +
+        `📍 *Address:* ${encodeURIComponent(address + ', ' + city + ', ' + state + ' - ' + pincode)}%0A` +
+        `━━━━━━━━━━━━━━━━━━━━%0A` +
+        `🛍️ *Items Ordered:*%0A${itemsSummaryText}%0A` +
+        `━━━━━━━━━━━━━━━━━━━━%0A` +
+        `💰 *Total Amount:* ₹${activeCheckoutTotal} (FREE Pan-India Shipping)%0A` +
+        `💳 *Payment Mode:* ${paymentMethod}%0A` +
+        `━━━━━━━━━━━━━━━━━━━━%0A` +
+        `Please confirm my order and share dispatch tracking. Thank you!`;
+
+    const whatsappUrl = `https://wa.me/917057167751?text=${waText}`;
+
+    document.getElementById('successOrderNumber').textContent = orderNumber;
+    document.getElementById('successCustomerName').textContent = fullName;
+    document.getElementById('successDeliveryAddress').textContent = `${address}, ${city}, ${state} - ${pincode}`;
+    document.getElementById('successPaymentMethod').textContent = paymentMethod === 'COD' ? 'Cash on Delivery (COD)' : (paymentMethod === 'UPI' ? 'UPI / Online Pay' : 'Direct WhatsApp Order');
+    document.getElementById('successTotalAmount').textContent = `₹${activeCheckoutTotal}`;
+
+    const successWhatsAppBtn = document.getElementById('successWhatsAppBtn');
+    if (successWhatsAppBtn) {
+        successWhatsAppBtn.href = whatsappUrl;
+    }
+
+    closeCheckoutModal();
+    openOrderSuccessModal();
+
+    if (paymentMethod === 'WhatsApp') {
+        window.open(whatsappUrl, '_blank');
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnText;
+    form.reset();
+}
+window.handlePlaceOrder = handlePlaceOrder;
+
+function openOrderSuccessModal() {
+    const modal = document.getElementById('orderSuccessModal');
+    if (modal) modal.style.display = 'flex';
+}
+window.openOrderSuccessModal = openOrderSuccessModal;
+
+function closeOrderSuccessModal() {
+    const modal = document.getElementById('orderSuccessModal');
+    if (modal) modal.style.display = 'none';
+}
+window.closeOrderSuccessModal = closeOrderSuccessModal;
 
 // Toggle user dropdown
 function toggleUserDropdown() {
@@ -389,24 +697,35 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Add to cart buttons
-    document.querySelectorAll('.btn-add-to-cart').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const productId = e.target.closest('[data-product-id]').dataset.productId;
-            addToCart(productId);
-        });
-    });
-    
     // Close modals when clicking outside
     window.addEventListener('click', (e) => {
         const authModal = document.getElementById('authModal');
         const cartModal = document.getElementById('cartModal');
+        const checkoutModal = document.getElementById('checkoutModal');
+        const orderSuccessModal = document.getElementById('orderSuccessModal');
         
         if (e.target === authModal) {
             closeAuthModal();
         }
         if (e.target === cartModal) {
             closeCartModal();
+        }
+        if (e.target === checkoutModal) {
+            closeCheckoutModal();
+        }
+        if (e.target === orderSuccessModal) {
+            closeOrderSuccessModal();
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        const userMenu = document.querySelector('.user-menu');
+        const dropdown = document.querySelector('.user-dropdown');
+        if (!userMenu || !dropdown) return;
+
+        if (!userMenu.contains(e.target)) {
+            dropdown.style.opacity = '0';
+            dropdown.style.visibility = 'hidden';
         }
     });
 });
