@@ -600,11 +600,13 @@ function openUpiPaymentModal(orderData) {
     const orderNo = orderData.orderNumber;
 
     const amountEl = document.getElementById('upiModalAmount');
-    const noticeAmountEl = document.getElementById('upiUtrAmountNotice');
+    const instructionsAmountEl = document.getElementById('upiInstructionsAmount');
+    const btnAmountEl = document.getElementById('upiPaidBtnAmount');
     const upiDisplayEl = document.getElementById('merchantUpiDisplay');
 
     if (amountEl) amountEl.textContent = `₹${amount}`;
-    if (noticeAmountEl) noticeAmountEl.textContent = `${amount}`;
+    if (instructionsAmountEl) instructionsAmountEl.textContent = `₹${amount}`;
+    if (btnAmountEl) btnAmountEl.textContent = `₹${amount}`;
     if (upiDisplayEl) upiDisplayEl.textContent = upiId;
 
     // Standard NPCI UPI URI
@@ -631,12 +633,6 @@ function openUpiPaymentModal(orderData) {
         waHelp.href = `https://wa.me/917057167751?text=${msg}`;
     }
 
-    const utrInput = document.getElementById('upiUtrNumber');
-    if (utrInput) {
-        utrInput.value = '';
-        setTimeout(() => utrInput.focus(), 300);
-    }
-
     modal.style.display = 'flex';
 }
 window.openUpiPaymentModal = openUpiPaymentModal;
@@ -661,38 +657,36 @@ function copyMerchantUpi() {
 }
 window.copyMerchantUpi = copyMerchantUpi;
 
-// Verify UTR & Finalize Order
+// Confirm Payment & Place Order
 async function submitUpiVerificationOrder() {
-    const utrInput = document.getElementById('upiUtrNumber');
-    const utr = utrInput ? utrInput.value.trim() : '';
-
-    if (!utr || utr.length < 10) {
-        showNotification('Please enter a valid 12-digit UPI Reference / UTR Number from your payment app.', 'error');
-        if (utrInput) utrInput.focus();
-        return;
-    }
-
     const verifyBtn = document.getElementById('confirmUpiPaymentBtn');
-    const origText = verifyBtn.innerHTML;
-    verifyBtn.disabled = true;
-    verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying Payment & Placing Order...';
+    const origText = verifyBtn ? verifyBtn.innerHTML : '';
+    if (verifyBtn) {
+        verifyBtn.disabled = true;
+        verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming Payment & Placing Order...';
+    }
 
     const orderData = pendingCheckoutData;
     if (!orderData) {
         showNotification('Order session expired. Please try placing your order again.', 'error');
         closeUpiPaymentModal();
-        verifyBtn.disabled = false;
-        verifyBtn.innerHTML = origText;
+        if (verifyBtn) {
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = origText;
+        }
         return;
     }
 
-    orderData.paymentMethod = `UPI (UTR: ${utr})`;
+    orderData.paymentMethod = 'UPI Online (Prepaid)';
+    orderData.paymentStatus = 'paid';
 
-    await finalizeOrderPlacement(orderData, `UPI UTR: ${utr}`);
+    await finalizeOrderPlacement(orderData, 'UPI Instant');
 
     closeUpiPaymentModal();
-    verifyBtn.disabled = false;
-    verifyBtn.innerHTML = origText;
+    if (verifyBtn) {
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = origText;
+    }
 
     const checkoutForm = document.getElementById('checkoutForm');
     if (checkoutForm) checkoutForm.reset();

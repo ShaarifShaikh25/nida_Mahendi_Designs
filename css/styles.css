@@ -3353,46 +3353,52 @@ body::before {
 
 /* UPI Payment Modal */
 .upi-payment-modal {
-    max-width: 520px;
+    max-width: 480px;
     width: 95%;
+    max-height: 90vh;
     border-radius: 24px;
     overflow: hidden;
     background: #fff;
     box-shadow: 0 25px 60px rgba(27, 35, 20, 0.25);
+    display: flex;
+    flex-direction: column;
 }
 
 .upi-payment-body {
-    padding: 24px 26px;
+    padding: 20px 22px;
     text-align: center;
     background: #fbf8f3;
+    overflow-y: auto;
+    max-height: calc(90vh - 65px);
+    -webkit-overflow-scrolling: touch;
 }
 
 .upi-amount-pill {
     display: inline-block;
     background: #fff;
     border: 1px solid var(--border-color);
-    padding: 8px 18px;
+    padding: 6px 16px;
     border-radius: 999px;
-    font-size: 15px;
+    font-size: 14.5px;
     font-weight: 700;
     color: var(--primary-color);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .upi-qr-card {
     background: #fff;
     border: 2px dashed rgba(45, 122, 62, 0.25);
-    border-radius: 20px;
-    padding: 16px;
+    border-radius: 18px;
+    padding: 14px;
     display: inline-block;
-    margin: 0 auto 16px;
-    box-shadow: 0 8px 24px rgba(27, 35, 20, 0.06);
+    margin: 0 auto 12px;
+    box-shadow: 0 8px 20px rgba(27, 35, 20, 0.05);
 }
 
 .upi-qr-card img {
-    width: 190px;
-    height: 190px;
+    width: 170px;
+    height: 170px;
     display: block;
     margin: 0 auto;
     border-radius: 8px;
@@ -3406,7 +3412,7 @@ body::before {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 8px 12px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     font-size: 13.5px;
 }
 

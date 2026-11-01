@@ -1036,14 +1036,15 @@
                     <a id="paytmIntentBtn" href="#" class="btn-upi-app"><i class="fas fa-wallet"></i> Paytm</a>
                 </div>
 
-                <div class="utr-form-card">
-                    <label for="upiUtrNumber">Enter 12-Digit UPI Ref / UTR Number *</label>
-                    <input type="text" id="upiUtrNumber" maxlength="12" pattern="\d{12}" placeholder="e.g. 431098765432" autocomplete="off" required>
-                    <small><i class="fas fa-shield-alt" style="color: var(--primary-color);"></i> Once you pay ₹<span id="upiUtrAmountNotice">0</span>, check the payment details in your UPI app and enter the 12-digit UTR/Ref No. here to confirm your order.</small>
+                <div style="background: rgba(45, 122, 62, 0.08); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; font-size: 13px; color: var(--text-dark); text-align: left;">
+                    <i class="fas fa-circle-check" style="color: var(--primary-color);"></i> <strong>Payment Instructions:</strong><br>
+                    1. Tap your preferred UPI app above or scan the QR code.<br>
+                    2. Complete the payment of <strong><span id="upiInstructionsAmount">₹0</span></strong>.<br>
+                    3. Click the button below to confirm your order!
                 </div>
 
-                <button type="button" id="confirmUpiPaymentBtn" class="btn btn-primary btn-block" onclick="submitUpiVerificationOrder()" style="padding: 13px; font-size: 15px; border-radius: 12px;">
-                    <i class="fas fa-check-circle"></i> Verify & Confirm Order
+                <button type="button" id="confirmUpiPaymentBtn" class="btn btn-primary btn-block" onclick="submitUpiVerificationOrder()" style="padding: 14px; font-size: 15px; border-radius: 12px; box-shadow: 0 4px 14px rgba(45, 122, 62, 0.3);">
+                    <i class="fas fa-check-circle"></i> I Have Paid <span id="upiPaidBtnAmount">₹0</span> (Confirm Order)
                 </button>
 
                 <div style="margin-top: 14px;">
