@@ -594,7 +594,7 @@ function openUpiPaymentModal(orderData) {
     const modal = document.getElementById('upiPaymentModal');
     if (!modal) return;
 
-    const upiId = window.MERCHANT_UPI_ID || '7057167751@okaxis';
+    const upiId = window.MERCHANT_UPI_ID || 'shaarif.s@ybl';
     const merchantName = window.MERCHANT_NAME || 'Nida Mahendi Designs';
     const amount = orderData.total;
     const orderNo = orderData.orderNumber;
@@ -602,12 +602,10 @@ function openUpiPaymentModal(orderData) {
     const amountEl = document.getElementById('upiModalAmount');
     const instructionsAmountEl = document.getElementById('upiInstructionsAmount');
     const btnAmountEl = document.getElementById('upiPaidBtnAmount');
-    const upiDisplayEl = document.getElementById('merchantUpiDisplay');
 
     if (amountEl) amountEl.textContent = `₹${amount}`;
     if (instructionsAmountEl) instructionsAmountEl.textContent = `₹${amount}`;
     if (btnAmountEl) btnAmountEl.textContent = `₹${amount}`;
-    if (upiDisplayEl) upiDisplayEl.textContent = upiId;
 
     // Standard NPCI UPI URI
     const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(orderNo)}`;
@@ -644,7 +642,7 @@ function closeUpiPaymentModal() {
 window.closeUpiPaymentModal = closeUpiPaymentModal;
 
 function copyMerchantUpi() {
-    const upiId = window.MERCHANT_UPI_ID || '7057167751@okaxis';
+    const upiId = window.MERCHANT_UPI_ID || 'shaarif.s@ybl';
     if (navigator.clipboard) {
         navigator.clipboard.writeText(upiId).then(() => {
             showNotification(`UPI ID "${upiId}" copied! Paste in any UPI app to pay.`, 'success');

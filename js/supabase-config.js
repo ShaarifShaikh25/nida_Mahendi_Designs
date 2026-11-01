@@ -13,7 +13,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_urArMM0zp7aoOHBnKpc7fg_Mv49X8gp';
 // If you have a Razorpay Key (e.g. 'rzp_test_...' or 'rzp_live_...'), set it here.
 // When empty (''), checkout seamlessly uses Direct UPI QR & UTR verification!
 window.RAZORPAY_KEY_ID = '';
-window.MERCHANT_UPI_ID = '7057167751@okaxis'; // Official business UPI ID
+window.MERCHANT_UPI_ID = 'shaarif.s@ybl'; // Official UPI ID
 window.MERCHANT_NAME = 'Nida Mahendi Designs';
 
 // Initialize Supabase client
