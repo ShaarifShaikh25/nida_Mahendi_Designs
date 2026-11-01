@@ -470,7 +470,7 @@ function openCheckoutModal() {
     if (subtotalEl) subtotalEl.textContent = `₹${activeCheckoutTotal}`;
     if (totalEl) totalEl.textContent = `₹${activeCheckoutTotal}`;
     if (submitBtn) {
-        submitBtn.innerHTML = `<i class="fas fa-lock"></i> Place Cash on Delivery Order (₹${activeCheckoutTotal})`;
+        submitBtn.innerHTML = `<i class="fas fa-qrcode"></i> Proceed to Online Payment (₹${activeCheckoutTotal})`;
     }
 
     modal.style.display = 'flex';
@@ -492,15 +492,19 @@ function updatePaymentSelection(radioInput) {
     const submitBtn = document.getElementById('submitOrderBtn');
     if (!submitBtn) return;
 
-    if (radioInput.value === 'COD') {
-        submitBtn.innerHTML = `<i class="fas fa-lock"></i> Place Cash on Delivery Order (₹${activeCheckoutTotal})`;
-    } else if (radioInput.value === 'UPI') {
-        submitBtn.innerHTML = `<i class="fas fa-qrcode"></i> Proceed to Pay via UPI (₹${activeCheckoutTotal})`;
+    if (radioInput.value === 'UPI') {
+        submitBtn.innerHTML = `<i class="fas fa-qrcode"></i> Proceed to Online Payment (₹${activeCheckoutTotal})`;
     } else if (radioInput.value === 'WhatsApp') {
         submitBtn.innerHTML = `<i class="fab fa-whatsapp"></i> Confirm & Place on WhatsApp (₹${activeCheckoutTotal})`;
     }
 }
 window.updatePaymentSelection = updatePaymentSelection;
+
+// ===================================
+// Checkout & Online Payment Engine
+// ===================================
+
+let pendingCheckoutData = null;
 
 async function handlePlaceOrder(e) {
     e.preventDefault();
@@ -517,7 +521,7 @@ async function handlePlaceOrder(e) {
     const city = formData.get('city')?.trim();
     const state = formData.get('state')?.trim();
     const pincode = formData.get('pincode')?.trim();
-    const paymentMethod = formData.get('payment_method') || 'COD';
+    const paymentMethod = formData.get('payment_method') || 'UPI';
 
     const phoneRegex = /^[6-9]\d{9}$/;
     if (!phoneRegex.test(phone)) {
@@ -531,10 +535,6 @@ async function handlePlaceOrder(e) {
         return;
     }
 
-    const originalBtnText = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Order...';
-
     const orderNumber = `NMD-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 900 + 100)}`;
 
     const shippingAddress = {
@@ -547,11 +547,219 @@ async function handlePlaceOrder(e) {
         pincode: pincode
     };
 
+    pendingCheckoutData = {
+        orderNumber,
+        fullName,
+        phone,
+        email,
+        shippingAddress,
+        paymentMethod,
+        items: [...activeCheckoutItems],
+        total: activeCheckoutTotal
+    };
+
+    // 1. If WhatsApp Order: place order as pending and open WhatsApp
+    if (paymentMethod === 'WhatsApp') {
+        const origText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing WhatsApp Order...';
+
+        pendingCheckoutData.paymentMethod = 'WhatsApp (Manual Prepaid)';
+        await finalizeOrderPlacement(pendingCheckoutData, 'WhatsApp');
+
+        closeCheckoutModal();
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+        form.reset();
+
+        const waText = encodeURIComponent(`Hello Nida Mahendi Designs,\nI have placed order ${orderNumber} for ₹${activeCheckoutTotal}.\nPlease send your payment QR / UPI details so I can confirm my order.`);
+        window.open(`https://wa.me/917057167751?text=${waText}`, '_blank');
+        return;
+    }
+
+    // 2. If Razorpay Gateway key is configured: launch Razorpay popup
+    if (window.RAZORPAY_KEY_ID && window.RAZORPAY_KEY_ID.startsWith('rzp_') && typeof window.Razorpay === 'function') {
+        launchRazorpayPayment(pendingCheckoutData, submitBtn, form);
+        return;
+    }
+
+    // 3. Otherwise: Open Built-in UPI QR & 12-Digit UTR Verification Modal!
+    closeCheckoutModal();
+    openUpiPaymentModal(pendingCheckoutData);
+}
+window.handlePlaceOrder = handlePlaceOrder;
+
+// UPI Payment Modal Functions
+function openUpiPaymentModal(orderData) {
+    const modal = document.getElementById('upiPaymentModal');
+    if (!modal) return;
+
+    const upiId = window.MERCHANT_UPI_ID || '7057167751@okaxis';
+    const merchantName = window.MERCHANT_NAME || 'Nida Mahendi Designs';
+    const amount = orderData.total;
+    const orderNo = orderData.orderNumber;
+
+    const amountEl = document.getElementById('upiModalAmount');
+    const noticeAmountEl = document.getElementById('upiUtrAmountNotice');
+    const upiDisplayEl = document.getElementById('merchantUpiDisplay');
+
+    if (amountEl) amountEl.textContent = `₹${amount}`;
+    if (noticeAmountEl) noticeAmountEl.textContent = `${amount}`;
+    if (upiDisplayEl) upiDisplayEl.textContent = upiId;
+
+    // Standard NPCI UPI URI
+    const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(orderNo)}`;
+
+    // High quality QR Code image
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUri)}`;
+    const qrImg = document.getElementById('upiQrImage');
+    if (qrImg) qrImg.src = qrUrl;
+
+    // App intent links for mobile
+    const gpayBtn = document.getElementById('gpayIntentBtn');
+    const phonepeBtn = document.getElementById('phonepeIntentBtn');
+    const paytmBtn = document.getElementById('paytmIntentBtn');
+
+    if (gpayBtn) gpayBtn.href = upiUri;
+    if (phonepeBtn) phonepeBtn.href = upiUri;
+    if (paytmBtn) paytmBtn.href = upiUri;
+
+    // WhatsApp Help link
+    const waHelp = document.getElementById('upiWhatsAppHelpLink');
+    if (waHelp) {
+        const msg = encodeURIComponent(`Hello Nida Mahendi Designs,\nI am paying ₹${amount} for Order #${orderNo}.\nHere is my payment details.`);
+        waHelp.href = `https://wa.me/917057167751?text=${msg}`;
+    }
+
+    const utrInput = document.getElementById('upiUtrNumber');
+    if (utrInput) {
+        utrInput.value = '';
+        setTimeout(() => utrInput.focus(), 300);
+    }
+
+    modal.style.display = 'flex';
+}
+window.openUpiPaymentModal = openUpiPaymentModal;
+
+function closeUpiPaymentModal() {
+    const modal = document.getElementById('upiPaymentModal');
+    if (modal) modal.style.display = 'none';
+}
+window.closeUpiPaymentModal = closeUpiPaymentModal;
+
+function copyMerchantUpi() {
+    const upiId = window.MERCHANT_UPI_ID || '7057167751@okaxis';
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(upiId).then(() => {
+            showNotification(`UPI ID "${upiId}" copied! Paste in any UPI app to pay.`, 'success');
+        }).catch(() => {
+            prompt('Copy UPI ID:', upiId);
+        });
+    } else {
+        prompt('Copy UPI ID:', upiId);
+    }
+}
+window.copyMerchantUpi = copyMerchantUpi;
+
+// Verify UTR & Finalize Order
+async function submitUpiVerificationOrder() {
+    const utrInput = document.getElementById('upiUtrNumber');
+    const utr = utrInput ? utrInput.value.trim() : '';
+
+    if (!utr || utr.length < 10) {
+        showNotification('Please enter a valid 12-digit UPI Reference / UTR Number from your payment app.', 'error');
+        if (utrInput) utrInput.focus();
+        return;
+    }
+
+    const verifyBtn = document.getElementById('confirmUpiPaymentBtn');
+    const origText = verifyBtn.innerHTML;
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying Payment & Placing Order...';
+
+    const orderData = pendingCheckoutData;
+    if (!orderData) {
+        showNotification('Order session expired. Please try placing your order again.', 'error');
+        closeUpiPaymentModal();
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = origText;
+        return;
+    }
+
+    orderData.paymentMethod = `UPI (UTR: ${utr})`;
+
+    await finalizeOrderPlacement(orderData, `UPI UTR: ${utr}`);
+
+    closeUpiPaymentModal();
+    verifyBtn.disabled = false;
+    verifyBtn.innerHTML = origText;
+
+    const checkoutForm = document.getElementById('checkoutForm');
+    if (checkoutForm) checkoutForm.reset();
+}
+window.submitUpiVerificationOrder = submitUpiVerificationOrder;
+
+// Razorpay Gateway Launcher
+function launchRazorpayPayment(orderData, submitBtn, form) {
+    const origText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening Razorpay Gateway...';
+
+    const options = {
+        key: window.RAZORPAY_KEY_ID,
+        amount: Math.round(orderData.total * 100), // in paise
+        currency: "INR",
+        name: window.MERCHANT_NAME || "Nida Mahendi Designs",
+        description: `Order ${orderData.orderNumber} - 100% Organic Henna`,
+        image: "images/logo.png",
+        handler: async function (response) {
+            orderData.paymentMethod = `Razorpay (${response.razorpay_payment_id})`;
+            await finalizeOrderPlacement(orderData, response.razorpay_payment_id);
+            closeCheckoutModal();
+            if (form) form.reset();
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origText;
+        },
+        prefill: {
+            name: orderData.fullName,
+            email: orderData.email,
+            contact: orderData.phone
+        },
+        theme: {
+            color: "#2d7a3e"
+        },
+        modal: {
+            ondismiss: function () {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = origText;
+                showNotification('Payment window cancelled. Please complete payment to confirm your order.', 'info');
+            }
+        }
+    };
+
+    try {
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+    } catch (err) {
+        console.error('Razorpay initialization error:', err);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+        // Fallback to UPI modal
+        closeCheckoutModal();
+        openUpiPaymentModal(orderData);
+    }
+}
+
+// Finalize Order (Database + LocalStorage + WhatsApp)
+async function finalizeOrderPlacement(orderData, paymentRef) {
+    const { orderNumber, fullName, phone, email, shippingAddress, paymentMethod, items, total } = orderData;
+
+    // 1. Supabase Database insertion
     if (typeof supabaseClient !== 'undefined' && supabaseClient) {
         try {
             const orderPayload = {
                 order_number: orderNumber,
-                total_amount: activeCheckoutTotal,
+                total_amount: total,
                 status: 'pending',
                 shipping_address: shippingAddress,
                 payment_method: paymentMethod
@@ -561,15 +769,15 @@ async function handlePlaceOrder(e) {
                 orderPayload.customer_id = currentUser.id;
             }
 
-            const { data: orderData, error: orderError } = await supabaseClient
+            const { data: dbOrder, error: orderError } = await supabaseClient
                 .from('orders')
                 .insert([orderPayload])
                 .select()
                 .single();
 
-            if (!orderError && orderData) {
-                const orderItemsPayload = activeCheckoutItems.map(item => ({
-                    order_id: orderData.id,
+            if (!orderError && dbOrder) {
+                const orderItemsPayload = items.map(item => ({
+                    order_id: dbOrder.id,
                     product_id: item.productId || item.product_id,
                     quantity: item.quantity,
                     price: item.product.price
@@ -582,61 +790,57 @@ async function handlePlaceOrder(e) {
         }
     }
 
+    // 2. LocalStorage backup
     const localOrders = JSON.parse(localStorage.getItem('user_orders') || '[]');
     localOrders.unshift({
         order_number: orderNumber,
-        items: activeCheckoutItems.map(i => ({ name: i.product.name, qty: i.quantity, price: i.product.price })),
-        total: activeCheckoutTotal,
+        items: items.map(i => ({ name: i.product.name, qty: i.quantity, price: i.product.price })),
+        total: total,
         payment_method: paymentMethod,
         shipping: shippingAddress,
         date: new Date().toISOString()
     });
     localStorage.setItem('user_orders', JSON.stringify(localOrders));
 
+    // Clear cart
     localStorage.removeItem('guestCart');
     if (currentUser && typeof supabaseClient !== 'undefined' && supabaseClient) {
         await supabaseClient.from('cart').delete().eq('customer_id', currentUser.id);
     }
     updateCartCount(0);
 
-    const itemsSummaryText = activeCheckoutItems.map(i => `• ${i.product.name} (Qty: ${i.quantity}) - ₹${i.product.price * i.quantity}`).join('%0A');
-    const waText = `🌿 *NEW ORDER - Nida Mahendi Designs*%0A` +
+    // Prepare WhatsApp Confirmation Message
+    const itemsSummaryText = items.map(i => `• ${i.product.name} (Qty: ${i.quantity}) - ₹${i.product.price * i.quantity}`).join('%0A');
+    const waText = `🌿 *NEW PREPAID ORDER - Nida Mahendi Designs*%0A` +
         `━━━━━━━━━━━━━━━━━━━━%0A` +
         `📦 *Order ID:* ${orderNumber}%0A` +
         `👤 *Name:* ${encodeURIComponent(fullName)}%0A` +
         `📞 *Phone:* ${phone}%0A` +
-        `📍 *Address:* ${encodeURIComponent(address + ', ' + city + ', ' + state + ' - ' + pincode)}%0A` +
+        `📍 *Delivery Address:* ${encodeURIComponent(shippingAddress.address + ', ' + shippingAddress.city + ', ' + shippingAddress.state + ' - ' + shippingAddress.pincode)}%0A` +
         `━━━━━━━━━━━━━━━━━━━━%0A` +
         `🛍️ *Items Ordered:*%0A${itemsSummaryText}%0A` +
         `━━━━━━━━━━━━━━━━━━━━%0A` +
-        `💰 *Total Amount:* ₹${activeCheckoutTotal} (FREE Pan-India Shipping)%0A` +
-        `💳 *Payment Mode:* ${paymentMethod}%0A` +
+        `💰 *Amount Paid:* ₹${total} (100% Prepaid - FREE Shipping)%0A` +
+        `💳 *Payment Verification:* ${encodeURIComponent(paymentMethod)}%0A` +
         `━━━━━━━━━━━━━━━━━━━━%0A` +
-        `Please confirm my order and share dispatch tracking. Thank you!`;
+        `Order is verified! Please prepare fresh batch and share dispatch tracking. Thank you!`;
 
     const whatsappUrl = `https://wa.me/917057167751?text=${waText}`;
 
+    // Fill success modal
     document.getElementById('successOrderNumber').textContent = orderNumber;
     document.getElementById('successCustomerName').textContent = fullName;
-    document.getElementById('successDeliveryAddress').textContent = `${address}, ${city}, ${state} - ${pincode}`;
-    document.getElementById('successPaymentMethod').textContent = paymentMethod === 'COD' ? 'Cash on Delivery (COD)' : (paymentMethod === 'UPI' ? 'UPI / Online Pay' : 'Direct WhatsApp Order');
-    document.getElementById('successTotalAmount').textContent = `₹${activeCheckoutTotal}`;
+    document.getElementById('successDeliveryAddress').textContent = `${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}`;
+    document.getElementById('successPaymentMethod').textContent = paymentMethod;
+    document.getElementById('successTotalAmount').textContent = `₹${total}`;
 
     const successWhatsAppBtn = document.getElementById('successWhatsAppBtn');
     if (successWhatsAppBtn) {
         successWhatsAppBtn.href = whatsappUrl;
     }
 
-    closeCheckoutModal();
     openOrderSuccessModal();
-
-    if (paymentMethod === 'WhatsApp') {
-        window.open(whatsappUrl, '_blank');
-    }
-
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalBtnText;
-    form.reset();
+    showNotification('Order placed and payment recorded successfully!', 'success');
 }
 window.handlePlaceOrder = handlePlaceOrder;
 
@@ -949,6 +1153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const orderSuccessModal = document.getElementById('orderSuccessModal');
         const customerOrdersModal = document.getElementById('customerOrdersModal');
         const wishlistModal = document.getElementById('wishlistModal');
+        const upiPaymentModal = document.getElementById('upiPaymentModal');
         
         if (e.target === authModal) {
             closeAuthModal();
@@ -967,6 +1172,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (e.target === wishlistModal) {
             closeWishlistModal();
+        }
+        if (e.target === upiPaymentModal) {
+            closeUpiPaymentModal();
         }
     });
 

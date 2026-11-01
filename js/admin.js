@@ -192,7 +192,7 @@ async function loadOrders() {
         const customerName = addr.full_name || 'Guest Customer';
         const phone = addr.phone || 'N/A';
         const fullAddress = `${addr.address || ''}, ${addr.city || ''} ${addr.pincode ? `(${addr.pincode})` : ''}`;
-        const payment = order.payment_method || 'COD';
+        const payment = order.payment_method || 'Online Prepaid';
         const status = order.status || 'pending';
         const orderKey = order.id || order.order_number;
 
@@ -317,7 +317,7 @@ async function viewOrderDetails(orderNumber) {
                 <strong style="color: var(--primary-color); font-size: 18px;">₹${order.total_amount}</strong>
             </div>
             <div style="margin-top: 6px; font-size: 12.5px; color: var(--text-light);">
-                Payment Mode: <strong>${order.payment_method || 'COD'}</strong> • Status: <strong>${(order.status || 'pending').toUpperCase()}</strong>
+                Payment Mode: <strong>${order.payment_method || 'Online Prepaid'}</strong> • Status: <strong>${(order.status || 'pending').toUpperCase()}</strong>
             </div>
         </div>
     `;

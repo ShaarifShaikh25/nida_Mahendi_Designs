@@ -36,9 +36,10 @@
         "addressCountry": "IN"
       },
       "priceRange": "₹199 - ₹999",
-      "paymentAccepted": "Cash on Delivery, UPI, Online"
+      "paymentAccepted": "UPI, Google Pay, PhonePe, Paytm, Cards, Netbanking (Prepaid Only)"
     }
     </script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <title>Nida Mahendi Designs - Organic Henna Products</title>
     <link rel="icon" type="image/png" href="images/logo.png">
@@ -679,7 +680,7 @@
                     <ul style="padding-left: 20px; margin: 12px 0;">
                         <li><strong>Dispatch Schedule:</strong> Fresh batches are freshly mixed, rolled, and dispatched within <strong>24 to 48 hours</strong> of order placement.</li>
                         <li><strong>Delivery Timelines:</strong> Standard Pan-India delivery takes <strong>3 to 6 business days</strong> depending on your pincode. Express courier partners include BlueDart, Delhivery, and India Post Speed Post.</li>
-                        <li><strong>Shipping Charges:</strong> We offer <strong>FREE Pan-India Shipping</strong> on all prepaid & COD orders.</li>
+                        <li><strong>100% Prepaid Orders Only:</strong> Because our organic henna cones are freshly rolled and 100% preservative-free, we do not accept Cash on Delivery (COD) to prevent transit spoilage. We provide <strong>FREE Pan-India Express Delivery</strong> on all prepaid online orders.</li>
                         <li><strong>❄️ Critical Freshness Instruction:</strong> Because our henna contains ZERO preservatives or toxic chemical dyes (No PPD), you <em>must</em> freeze the cones upon arrival if not using them immediately. Stored frozen, they remain fresh for up to 6 months!</li>
                     </ul>
                 </div>
@@ -848,28 +849,22 @@
                                 </div>
                             </div>
 
-                            <h3 class="checkout-section-title" style="margin-top: 20px;"><i class="fas fa-credit-card"></i> Payment Method</h3>
+                            <h3 class="checkout-section-title" style="margin-top: 20px;"><i class="fas fa-credit-card"></i> Payment Method (Prepaid Only)</h3>
+                            
+                            <div style="background: rgba(45, 122, 62, 0.08); border-left: 3px solid var(--primary-color); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; color: var(--text-dark);">
+                                <i class="fas fa-shield-halved" style="color: var(--primary-color);"></i> <strong>100% Prepaid Orders Only:</strong> Because our organic henna cones contain zero chemical preservatives and are perishable, we do not support Cash on Delivery (COD). Dispatched fresh with FREE Pan-India shipping!
+                            </div>
+
                             <div class="payment-options">
                                 <label class="payment-option selected">
-                                    <input type="radio" name="payment_method" value="COD" checked onchange="updatePaymentSelection(this)">
-                                    <div class="payment-option-content">
-                                        <div class="payment-option-header">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                            <strong>Cash on Delivery (COD)</strong>
-                                            <span class="badge-mini">Popular</span>
-                                        </div>
-                                        <p>Pay with cash or UPI when your fresh henna arrives.</p>
-                                    </div>
-                                </label>
-
-                                <label class="payment-option">
-                                    <input type="radio" name="payment_method" value="UPI" onchange="updatePaymentSelection(this)">
+                                    <input type="radio" name="payment_method" value="UPI" checked onchange="updatePaymentSelection(this)">
                                     <div class="payment-option-content">
                                         <div class="payment-option-header">
                                             <i class="fas fa-qrcode"></i>
-                                            <strong>Instant UPI / QR Pay</strong>
+                                            <strong>Instant UPI / QR / Cards / Netbanking</strong>
+                                            <span class="badge-mini" style="background: #2d7a3e; color: #fff;">Online</span>
                                         </div>
-                                        <p>Pay via Google Pay, PhonePe, Paytm or any UPI App.</p>
+                                        <p>Pay securely via Google Pay, PhonePe, Paytm, BHIM, Cards or UPI QR.</p>
                                     </div>
                                 </label>
 
@@ -878,9 +873,9 @@
                                     <div class="payment-option-content">
                                         <div class="payment-option-header">
                                             <i class="fab fa-whatsapp" style="color: #25D366;"></i>
-                                            <strong>Direct WhatsApp Order</strong>
+                                            <strong>Direct WhatsApp Order & Pay</strong>
                                         </div>
-                                        <p>Send pre-filled receipt to our official WhatsApp for fast confirmation.</p>
+                                        <p>Get instant invoice on WhatsApp (+91 7057167751) and pay directly.</p>
                                     </div>
                                 </label>
                             </div>
@@ -1007,6 +1002,55 @@
             <div class="modal-footer" style="padding: 14px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #fafafa;">
                 <a href="#products" class="btn btn-secondary btn-sm" onclick="closeWishlistModal()"><i class="fas fa-shopping-bag"></i> Browse More Products</a>
                 <button type="button" class="btn btn-primary btn-sm" onclick="closeWishlistModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPI Payment & Verification Modal -->
+    <div id="upiPaymentModal" class="modal" role="dialog" aria-labelledby="upiPaymentTitle" aria-modal="true" style="display: none;">
+        <div class="modal-content upi-payment-modal">
+            <div class="modal-header">
+                <h2 id="upiPaymentTitle"><i class="fas fa-qrcode" style="color: var(--primary-color);"></i> Complete Online Payment</h2>
+                <button class="close-modal" onclick="closeUpiPaymentModal()" aria-label="Close payment">&times;</button>
+            </div>
+            <div class="upi-payment-body">
+                <div class="upi-amount-pill">
+                    Total Amount to Pay: <strong id="upiModalAmount" style="color: var(--primary-color); font-size: 1.25rem;">₹0</strong>
+                </div>
+
+                <div class="upi-qr-card">
+                    <img id="upiQrImage" src="" alt="Scan & Pay UPI QR">
+                    <div style="font-size: 12px; color: var(--text-light); margin-top: 8px;">
+                        <i class="fas fa-qrcode"></i> Scan using Google Pay, PhonePe, Paytm or any UPI App
+                    </div>
+                </div>
+
+                <div class="upi-id-box">
+                    <span>Pay to UPI ID: <strong id="merchantUpiDisplay">7057167751@okaxis</strong></span>
+                    <button type="button" class="btn-copy-upi" onclick="copyMerchantUpi()"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+
+                <div class="upi-apps-row">
+                    <a id="gpayIntentBtn" href="#" class="btn-upi-app"><i class="fab fa-google-pay" style="font-size: 1.4rem;"></i> GPay</a>
+                    <a id="phonepeIntentBtn" href="#" class="btn-upi-app"><i class="fas fa-mobile-screen-button"></i> PhonePe</a>
+                    <a id="paytmIntentBtn" href="#" class="btn-upi-app"><i class="fas fa-wallet"></i> Paytm</a>
+                </div>
+
+                <div class="utr-form-card">
+                    <label for="upiUtrNumber">Enter 12-Digit UPI Ref / UTR Number *</label>
+                    <input type="text" id="upiUtrNumber" maxlength="12" pattern="\d{12}" placeholder="e.g. 431098765432" autocomplete="off" required>
+                    <small><i class="fas fa-shield-alt" style="color: var(--primary-color);"></i> Once you pay ₹<span id="upiUtrAmountNotice">0</span>, check the payment details in your UPI app and enter the 12-digit UTR/Ref No. here to confirm your order.</small>
+                </div>
+
+                <button type="button" id="confirmUpiPaymentBtn" class="btn btn-primary btn-block" onclick="submitUpiVerificationOrder()" style="padding: 13px; font-size: 15px; border-radius: 12px;">
+                    <i class="fas fa-check-circle"></i> Verify & Confirm Order
+                </button>
+
+                <div style="margin-top: 14px;">
+                    <a id="upiWhatsAppHelpLink" href="#" target="_blank" style="color: var(--text-light); font-size: 12.5px; text-decoration: underline;">
+                        <i class="fab fa-whatsapp" style="color: #25D366;"></i> Need help or want to send screenshot on WhatsApp?
+                    </a>
+                </div>
             </div>
         </div>
     </div>
